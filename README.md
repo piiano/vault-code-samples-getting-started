@@ -5,3 +5,4 @@ Code samples for Vault's getting started guide in various languages
 2. Add Java @yossi
 3. Prepare for open source @david
 4. Add to external docs @david
+5. Add to nightly @nir (+@david)
