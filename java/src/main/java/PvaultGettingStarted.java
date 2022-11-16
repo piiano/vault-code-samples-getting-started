@@ -15,10 +15,9 @@ public class PvaultGettingStarted {
     public static final String JSON = "json";
     public static final String CUSTOMERS_COLLECTION = "customers";
     public static final String APP_FUNCTIONALITY_REASON = "AppFunctionality";
-    public static final List<String> NO_OPTIONS = emptyList();
     public static final String NO_ADHOC_REASON = "";
+    public static final List<String> NO_OPTIONS = emptyList();
     public static final String USE_DEFAULT_TTL = "";
-    public static final Integer DEFAULT_PAGE_SIZE = 100;
     public static final String ALL_UNSAFE = "unsafe"; // fetch all the properties
 
     public static final int DEFAULT_PVAULT_PORT = 8123;
@@ -43,8 +42,8 @@ public class PvaultGettingStarted {
         detokenizeToken(tokensApi, token);
 
         print("\n\n== Step 6: Query your data ==\n\n");
-        searchObjects(objectsApi);
-        getObjectsById(objectsApi, customer1ID);
+        queryAllObjectsWithPageSize(objectsApi);
+        queryPropertiesOfObjectsById(objectsApi, customer1ID);
         getTransformedPropertiesOfObjects(objectsApi, customer1ID);
 
         print("\n\n== Step 7: Delete data ==\n\n");
@@ -147,15 +146,15 @@ public class PvaultGettingStarted {
         assert "john@somemail.com".equals(returnedEmail);
     }
 
-    private static void searchObjects(ObjectsApi objectsApi) throws ApiException {
+    private static void queryAllObjectsWithPageSize(ObjectsApi objectsApi) throws ApiException {
 
         ModelsQuery query = new ModelsQuery();
         query.setMatch(Collections.singletonMap("email", "john@somemail.com"));
         ModelsObjectFieldsPage objectIdsPage =
-                objectsApi.searchObjects(CUSTOMERS_COLLECTION, APP_FUNCTIONALITY_REASON, query, NO_ADHOC_REASON,
-                        false, DEFAULT_PAGE_SIZE, "", ImmutableList.of(ALL_UNSAFE), null);
+                objectsApi.getObjects(CUSTOMERS_COLLECTION, APP_FUNCTIONALITY_REASON, NO_ADHOC_REASON,
+                        false, 1, "", emptyList(), ImmutableList.of(ALL_UNSAFE), null);
 
-        assert 1 == objectIdsPage.getResults().size();
+        assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
         assert "john@somemail.com".equals(searchResult.get("email"));
         assert "123-12-1234".equals(searchResult.get("ssn"));
@@ -164,17 +163,17 @@ public class PvaultGettingStarted {
         print("object retrieved by search: ", searchResult.toString());
     }
 
-    private static void getObjectsById(ObjectsApi objectsApi, UUID id) throws ApiException {
+    private static void queryPropertiesOfObjectsById(ObjectsApi objectsApi, UUID id) throws ApiException {
 
         ModelsObjectFieldsPage objectIdsPage = objectsApi.getObjects(CUSTOMERS_COLLECTION, APP_FUNCTIONALITY_REASON,
                 NO_ADHOC_REASON, false, null, "", ImmutableList.of(id),
                 emptyList(), ImmutableList.of("ssn"));
 
-        assert 1 == objectIdsPage.getResults().size();
+        assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
-        assert 1 == searchResult.size();
+        assert searchResult.size() == 1;
         assert "123-12-1234".equals(searchResult.get("ssn"));
-        print("object retrieved by id: ", searchResult.toString());
+        print("ssn property retrieved by id: ", searchResult.toString());
     }
 
     private static void getTransformedPropertiesOfObjects(ObjectsApi objectsApi, UUID id) throws ApiException {
@@ -183,7 +182,7 @@ public class PvaultGettingStarted {
                 NO_ADHOC_REASON, false, null, "", ImmutableList.of(id),
                 emptyList(), ImmutableList.of("ssn.mask", "email.mask", "phone_number.mask"));
 
-        assert 1 == objectIdsPage.getResults().size();
+        assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
         assert "j***@somemail.com".equals(searchResult.get("email"));
         assert "***-**-1234".equals(searchResult.get("ssn"));
