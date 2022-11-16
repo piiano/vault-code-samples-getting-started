@@ -19,17 +19,9 @@ PVAULT_ADDRESS = 'http://localhost:8123'
 #      for the sdk explaining how to launch vault
 def check_clear(client):
     collections_manager = collections_api.CollectionsApi(client)
-    # Delete all previous collections from vault
+    # Delete previous collection from vault
     all_collections = list(collections_manager.get_all_collections())    
     if all(c.name != COLLECTION_NAME for c in all_collections):
-        return
-
-    print("Your Vault is not empty! Running the script might fail.\n"
-          "Would you like to clear the Vault? y/[n]\n"
-          "(Don't do this on a Vault with real data)")
-    response = input()
-    if response != 'y':
-        print('')
         return
 
     print("Clearing the collection from previous runs...")
@@ -38,7 +30,7 @@ def check_clear(client):
             continue
         collections_manager.delete_collection(collection.name)
 
-    # Check all previous collections have been deleted
+    # Check previous collection have been deleted
     # assert len(collections_manager.get_all_collections()) == 0
     all_collections = list(collections_manager.get_all_collections())
     assert all(c.name != COLLECTION_NAME for c in all_collections)
