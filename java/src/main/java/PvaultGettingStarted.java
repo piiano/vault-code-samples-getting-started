@@ -51,7 +51,7 @@ public class PvaultGettingStarted {
         deleteToken(tokensApi, token);
         deleteObject(objectsApi, customer1ID);
 
-        print("Finished successfully\n");
+        print("Done!\n");
     }
 
     private static void checkPvaultStatus(ApiClient pvaultClient) throws ApiException {
