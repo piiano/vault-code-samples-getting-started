@@ -1,10 +1,10 @@
 # Piiano vault open api downloaded
 openapi.json
 
-# Folder of generated Python sdk
+# Generated Python sdk
 vault_python_sdk
 
-# Folder of generated Java sdk
+# Generated Java sdk
 vault_java_sdk
 
 # Byte-compiled / optimized / DLL files

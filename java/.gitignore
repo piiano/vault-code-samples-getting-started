@@ -1,7 +1,7 @@
 # Piiano vault open api downloaded
 openapi.json
 
-# Folder of generated Java sdk
+# Generated Java sdk
 vault_java_sdk
 
 # Java
