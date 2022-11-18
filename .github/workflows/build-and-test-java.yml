@@ -1,37 +1,13 @@
 name: Build and Test
-on: [push]
+on:
+  push:
+    paths:
+      - java/**
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
 
 jobs:
-#  test-python:
-#    name: Test Python - Getting Started.
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Check Out Repo.
-#        uses: actions/checkout@v3
-#
-#      - name: Install python
-#        uses: actions/setup-python@v4
-#
-#      - name: Prepare.
-#        run: |
-#          cd python
-#          ./prepare.sh
-#
-#      - name: Start Vault and tests.
-#        run: |
-#          docker run --rm \
-#            --name pvault-dev \
-#            -p 8123:8123 \
-#            -e PVAULT_DEVMODE=true \
-#            -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
-#            -d \
-#            piiano/pvault-dev:0.9.8
-#          sleep 60
-#          cd python
-#          ./run.sh
   test-java:
     name: Test Java - Getting Started.
     runs-on: ubuntu-latest
