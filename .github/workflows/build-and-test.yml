@@ -42,14 +42,25 @@ jobs:
       - name: Install java
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
+          distribution: 'zulu'
           java-version: '17'
           cache: 'maven'
 
-      - name: Prepare.
+      - name: Build with Maven
         run: |
           cd java
           ./prepare.sh
+#          curl -o openapi.json https://piiano.com/docs/assets/openapi.json
+#          docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 generate \
+#              -i local/openapi.json \
+#              -g java \
+#              -o local/vault_java_sdk
+#          cd vault_java_sdk
+#          mvn -B package --no-transfer-progress --file pom.xml
+#      - name: Prepare.
+#        run: |
+#          cd java
+#          ./prepare.sh
 #          curl -o openapi.json https://piiano.com/docs/assets/openapi.json
 #          docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 generate \
 #              -i local/openapi.json \
