@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - java/**
+  workflow_dispatch:
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
@@ -24,8 +25,8 @@ jobs:
 
       - name: Build with Maven
         run: |
-          cd java
-          ./prepare.sh
+#          cd java
+#          ./prepare.sh
 #          curl -o openapi.json https://piiano.com/docs/assets/openapi.json
 #          docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 generate \
 #              -i local/openapi.json \
