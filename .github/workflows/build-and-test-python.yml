@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - python/**
-  [workflow_dispatch]:
+  workflow_dispatch:
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
