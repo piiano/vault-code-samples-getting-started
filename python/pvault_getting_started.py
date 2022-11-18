@@ -15,25 +15,13 @@ PVAULT_AUTHENTICATION = "pvaultauth"
 PVAULT_ADDRESS = 'http://localhost:8123'
 
 
-#TODO: Consider removing the call to this function once we have a global readme 
-#      for the sdk explaining how to launch vault
+# Verify the DB is empty. For safety reasons, don't work on non empty DB
 def check_clear(client):
     collections_manager = collections_api.CollectionsApi(client)
-    # Delete previous collection from vault
-    all_collections = list(collections_manager.get_all_collections())    
-    if all(c.name != COLLECTION_NAME for c in all_collections):
-        return
 
-    print("Clearing the collection from previous runs...")
-    for collection in all_collections:
-        if collection.name != COLLECTION_NAME:
-            continue
-        collections_manager.delete_collection(collection.name)
-
-    # Check previous collection have been deleted
-    # assert len(collections_manager.get_all_collections()) == 0
     all_collections = list(collections_manager.get_all_collections())
-    assert all(c.name != COLLECTION_NAME for c in all_collections)
+    assert len(collections_manager.get_all_collections()) == 0, \
+        "Bailing out due to existence of collections from previous runs. Please clear or recreate the Vault from scratch."
 
 
 def main():
@@ -49,7 +37,15 @@ def main():
     objects_manager = objects_api.ObjectsApi(client)
     tokens_manager = tokens_api.TokensApi(client)
 
-    check_clear(client)
+    try:
+        check_clear(client)
+    except Exception as e:
+        print(e)
+        # openapi client doesn't expose the exception so revert to this "huristics" for clarity
+        if "Connection refused" in str(e):
+            print("Unable to connect to the Vault ({}). Is it up?".format(PVAULT_ADDRESS))
+        return
+
 
     print('\n\n== Step 3: Create a collection ==\n\n')
 
