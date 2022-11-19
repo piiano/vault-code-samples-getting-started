@@ -5,13 +5,14 @@ import org.openapitools.client.Configuration;
 import org.openapitools.client.api.*;
 import org.openapitools.client.model.*;
 
+import javax.management.RuntimeErrorException;
 import java.util.*;
 
 import static java.util.Collections.emptyList;
 
 public class PvaultGettingStarted {
 
-    public static final String COLLECTION_NAME = "customers_test";
+    public static final String COLLECTION_NAME = "customers";
     public static final String HEALTH_PASS = "pass";
     public static final String JSON = "json";
     public static final String APP_FUNCTIONALITY_REASON = "AppFunctionality";
@@ -30,7 +31,8 @@ public class PvaultGettingStarted {
 
         print("\n\n== Step 3: Create a collection ==\n\n");
         CollectionsApi collectionsApi = new CollectionsApi(pvaultClient);
-        deleteCollection(collectionsApi);
+        // deleteCollection(collectionsApi);
+        verifyNoCollections(collectionsApi);
         createCollection(collectionsApi);
 
         print("\n\n== Step 4: Add data ==\n\n");
@@ -67,12 +69,29 @@ public class PvaultGettingStarted {
     }
 
     private static void deleteCollection(CollectionsApi collectionApi) {
-
         print("Clearing the collection from previous runs");
         try {
             collectionApi.deleteCollection(COLLECTION_NAME);
         } catch (ApiException e) {
             // test collection wasn't exist, continue test..
+        }
+    }
+    // for safety reasons refuse to run if the collection already exists
+    private static void verifyNoCollections(CollectionsApi collectionApi) throws ApiException {
+        print("Verifying the test collection is not present");
+        try {
+            List<ModelsProperty> mp =
+            collectionApi.listCollectionProperties(COLLECTION_NAME,new ArrayList<>());
+            throw new RuntimeException("Collection " + COLLECTION_NAME + " already exists.\n" +
+                  "Recreate the Vault from scratch or uncomment deleteCollection()" +
+                  " in this code. Bailing out.\n");
+        } catch (ApiException e) {
+            if (e.getCode() == 404) {
+                print("Collection "  + COLLECTION_NAME + " not found. Will create it");
+            }
+            else {
+                throw new ApiException(e);
+            }
         }
     }
 
@@ -266,6 +285,13 @@ public class PvaultGettingStarted {
         PvaultGettingStarted pvaultGettingStarted = new PvaultGettingStarted();
         try {
             pvaultGettingStarted.run();
+        } catch (org.openapitools.client.ApiException apiException) {
+            if (apiException.getMessage().contains("java.net.ConnectException")) {
+                print(apiException.getMessage() + "\n\nIs the Vault running?\n");
+            }
+            else {
+                throw new RuntimeException(apiException);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
