@@ -6,7 +6,7 @@ IFS=$'\n\t'
 curl -o openapi.json https://piiano.com/docs/assets/openapi.json
 
 # Generate java sdk.
-docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 generate \
+docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.2.1 generate \
     -i local/openapi.json \
     -g java \
     -o local/vault_java_sdk
