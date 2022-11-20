@@ -48,8 +48,7 @@ public class TestTokens {
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizedResult = batchDetokenize();
 
-        // Enable this assertion in the release
-        // assertDetokenizeResultIsCorrect(tokenizeResult, detokenizedResult);
+        assertDetokenizeResultIsCorrect(tokenizeResult, detokenizedResult);
     }
 
     @ParameterizedTest
@@ -59,8 +58,7 @@ public class TestTokens {
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizeResult = singleDetokenize(tokenizeResult);
 
-        // Enable this assertion in the release
-        // assertDetokenizeResultIsCorrect(tokenizeResult, detokenizeResult);
+        assertDetokenizeResultIsCorrect(tokenizeResult, detokenizeResult);
     }
 
     @ParameterizedTest
@@ -153,8 +151,7 @@ public class TestTokens {
         SearchResult searchResult = new SearchResult(tokenMetadata);
 
         // and verify that all token ids are present and are associated with the correct object id.
-        // Enable this assertion in the release
-        // assertSearchResultsMatchTokenizeResult(tokenizeResult, searchResult);
+        assertSearchResultsMatchTokenizeResult(tokenizeResult, searchResult);
     }
 
     private static Stream<Arguments> tokenizationTypeAndDeleted() {
