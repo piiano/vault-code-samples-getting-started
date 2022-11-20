@@ -41,7 +41,7 @@ def main():
         check_clear(client)
     except Exception as e:
         print(e)
-        # openapi client doesn't expose the exception so revert to this "huristics" for clarity
+        # openapi client doesn't expose which exception was thrown so revert to this heuristic for clarity
         if "Connection refused" in str(e):
             print("Unable to connect to the Vault ({}). Is it up?".format(PVAULT_ADDRESS))
         return
