@@ -15,4 +15,4 @@ echo "Installing SDK"
 cd vault_java_sdk && mvn clean install
 
 echo "Build and install 'Getting started'"
-cd .. && mvn clean install
+cd .. && mvn clean install -DskipTests

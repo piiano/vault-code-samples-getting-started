@@ -36,4 +36,4 @@ jobs:
             -d \
             piiano/pvault-dev:0.9.8
           sleep 10
-          cd java && ./run.sh
+          cd java && ./test.sh ./run.sh
