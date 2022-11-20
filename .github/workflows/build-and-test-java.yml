@@ -19,9 +19,9 @@ jobs:
       - name: Install java
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
           java-version: '19'
-          cache: 'maven'
+          distribution: 'zulu'
+          cache: maven
 
       - name: Prepare.
         run: cd java && ./prepare.sh
