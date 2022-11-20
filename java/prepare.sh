@@ -12,9 +12,7 @@ docker run --rm -v "${PWD}:/app" openapitools/openapi-generator-cli:v6.2.1 gener
     -o /app/vault_java_sdk
 
 # Build and install the Java sdk.
-cd vault_java_sdk
-mvn clean install
+cd vault_java_sdk && mvn clean install
 
 # Build and install 'Getting started'.
-cd ..
-mvn clean install
+cd .. && mvn clean install
