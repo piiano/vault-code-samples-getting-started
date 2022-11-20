@@ -1,0 +1,39 @@
+name: Build and Test Java
+on:
+  push:
+    paths:
+      - java/**
+  workflow_dispatch:
+
+env:
+  PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
+
+jobs:
+  test-java:
+    name: Test Java - Getting Started.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Out Repo.
+        uses: actions/checkout@v3
+
+      - name: Install java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '19'
+          distribution: 'zulu'
+          cache: maven
+
+      - name: Prepare.
+        run: cd java && ./prepare.sh
+
+      - name: Start Vault and run tests.
+        run: |
+          docker run --rm \
+            --name pvault-dev \
+            -p 8123:8123 \
+            -e PVAULT_DEVMODE=true \
+            -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
+            -d \
+            piiano/pvault-dev:0.9.8
+          sleep 10
+          cd java && ./test.sh ./run.sh
