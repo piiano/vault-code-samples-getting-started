@@ -20,11 +20,9 @@ jobs:
        uses: actions/setup-python@v4
 
      - name: Prepare.
-       run: |
-         cd python
-         ./prepare.sh
+       run: cd python && ./prepare.sh
 
-     - name: Start Vault and tests.
+     - name: Start Vault and run tests.
        run: |
          docker run --rm \
            --name pvault-dev \
@@ -34,6 +32,4 @@ jobs:
            -d \
            piiano/pvault-dev:0.9.8
          sleep 10
-         cd python
-         ./run.sh
- 
+         cd python && ./run.sh

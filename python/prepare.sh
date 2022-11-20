@@ -5,7 +5,6 @@ IFS=$'\n\t'
 python3 -m venv .venv --prompt vault_getting_started
 source .venv/bin/activate
 
-# Download Piiano vault open api.
 echo "Downloading openapi file"
 curl -o openapi.json https://piiano.com/docs/assets/openapi.json
 
@@ -16,5 +15,4 @@ docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 gen
     -o local/vault_python_sdk
 
 echo "Installing SDK"
-cd vault_python_sdk
-pip install .
+cd vault_python_sdk && pip install .
