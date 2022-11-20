@@ -20,8 +20,9 @@ The repository is organized with a folder per language. In each language you wil
 
 ## Usage
 
-Run Piiano Vault, ideally using the pvault-dev flavor as explained here: https://piiano.com/docs/guides/get-started#install-piiano-vault
+Run Piiano Vault. The simplest way is using the pvault-dev flavor as explained here: https://piiano.com/docs/guides/get-started#install-piiano-vault
 
+Assuming the Vault is running on localhost listening on port 8123 (the default):
 ### For Python
 ```
 cd python
@@ -35,7 +36,3 @@ cd java
 ./run.sh
 ```
 
-Tasks:
-1. Add Java @yossi
-2. Prepare for open source @david
-3. Add to nightly @nir (+@david)
