@@ -1,0 +1,39 @@
+package common;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.openapitools.client.ApiException;
+
+import javax.ws.rs.core.Response;
+import java.util.HashMap;
+
+public class ApiError {
+    public Response.Status status;
+    public String error_code;
+    public String message;
+    public HashMap<String, String> context;
+
+    public ApiError(){}
+
+    private ApiError(Response.Status status, String error_code, String message, HashMap<String, String> context) {
+        this.status = status;
+        this.error_code = error_code;
+        this.message = message;
+        this.context = context;
+    }
+
+    public static ApiError fromException(ApiException ex) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        var error = mapper.readValue(ex.getResponseBody(), ApiError.class);
+        error.status = Response.Status.fromStatusCode(ex.getCode());
+        return error;
+    }
+
+    public static ApiError fromStatus(Response.Status status) {
+        return new ApiError(status, null, null, null);
+    }
+
+    public static ApiError fromStatusCodeAndMessage(Response.Status status, String error_code, String message) {
+        return new ApiError(status, error_code, message, null);
+    }
+}
