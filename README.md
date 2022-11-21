@@ -18,6 +18,8 @@ More details can be found [on our website](https://piiano.com/pii-data-privacy-v
 This repository contains code samples for connecting to Piiano Vault using SDKs that are auto generated from the Vault's openapi.yaml file. 
 The repository is organized with a folder per language. In each language you will find several samples, including an implementation of the https://piiano.com/docs/guides/get-started flow that is based there on the Piiano Vault CLI.
 
+For Java, we have included additional test examples of how to work with tokens. 
+
 ## Usage
 
 Run Piiano Vault. The simplest way is using the pvault-dev flavor as explained here: https://piiano.com/docs/guides/get-started#install-piiano-vault
