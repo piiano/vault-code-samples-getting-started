@@ -9,6 +9,7 @@ import org.openapitools.client.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class TokensClient {
 
@@ -24,11 +25,11 @@ public class TokensClient {
         collections = new TokensApi(client);
     }
 
-    public List<ModelsTokenValue> tokenize(String collectionName, ModelsTokenizeRequest modelsTokenizeRequest) throws ApiException {
+    public List<TokenValue> tokenize(String collectionName, TokenizeRequest modelsTokenizeRequest) throws ApiException {
         return collections.tokenize(collectionName, reason, modelsTokenizeRequest, ttl, noAdhocReason, reloadCache);
     }
 
-    public List<ModelsDetokenizedToken> detokenize(String collectionName, TokenDefinition tokens, boolean includeMetadata, boolean deleted) throws ApiException {
+    public List<DetokenizedToken> detokenize(String collectionName, TokenDefinition tokens, boolean includeMetadata, boolean deleted) throws ApiException {
         List<String> options = new ArrayList<>();
         if (includeMetadata) {
             options.add("include_metadata");
@@ -43,15 +44,15 @@ public class TokensClient {
         collections.deleteTokens(collectionName, reason, tokens.objectIds(), tokens.tags(), tokens.tokenIds(), options, noAdhocReason, reloadCache);
     }
 
-    public List<ModelsTokenMetadata> searchTokens(String collectionName, ModelsQueryToken modelsQueryToken) throws ApiException {
+    public List<TokenMetadata> searchTokens(String collectionName, QueryToken modelsQueryToken) throws ApiException {
         return collections.searchTokens(collectionName, reason, modelsQueryToken, options, noAdhocReason, reloadCache);
     }
 
-    public void updateTokens(String collectionName, TokenDefinition tokens, ModelsUpdateTokenRequest modelsUpdateTokenRequest) throws ApiException {
+    public void updateTokens(String collectionName, TokenDefinition tokens, UpdateTokenRequest modelsUpdateTokenRequest) throws ApiException {
         collections.updateTokens(collectionName, reason, modelsUpdateTokenRequest, ttl, tokens.objectIds(), tokens.tags(), tokens.tokenIds(), options, noAdhocReason, reloadCache);
     }
 
-    public List<ModelsRotatedToken> rotateTokens(String collectionName, List<String> tokenIds) throws ApiException {
+    public Map<String, String> rotateTokens(String collectionName, List<String> tokenIds) throws ApiException {
         return collections.rotateTokens(tokenIds, collectionName, reason, noAdhocReason, reloadCache);
     }
 }

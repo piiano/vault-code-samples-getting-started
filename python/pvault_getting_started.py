@@ -19,8 +19,8 @@ PVAULT_ADDRESS = 'http://localhost:8123'
 def check_clear(client):
     collections_manager = collections_api.CollectionsApi(client)
 
-    all_collections = list(collections_manager.get_all_collections())
-    assert len(collections_manager.get_all_collections()) == 0, \
+    all_collections = list(collections_manager.list_collections())
+    assert len(collections_manager.list_collections()) == 0, \
         "Bailing out due to existence of collections from previous runs. Please clear or recreate the Vault from scratch."
 
 
@@ -46,22 +46,21 @@ def main():
             print("Unable to connect to the Vault ({}). Is it up?".format(PVAULT_ADDRESS))
         return
 
-
     print('\n\n== Step 3: Create a collection ==\n\n')
 
     # Note: Adding a collection with pvschema is not supported in the SDK
     #       Throughout this script we will use JSON exclusively
 
-    ssn_property = models.ModelsProperty(name="ssn", pii_type_name="SSN", is_unique=True, description="Social security number")
-    email_property = models.ModelsProperty(name="email", pii_type_name="EMAIL")
-    customers_collection = models.ModelsCollection(
+    ssn_property = models.ModelProperty(name="ssn", pii_type_name="SSN", is_unique=True, description="Social security number")
+    email_property = models.ModelProperty(name="email", pii_type_name="EMAIL")
+    customers_collection = models.Collection(
         name=COLLECTION_NAME,
         type="PERSONS",
         properties=[
             ssn_property,
             email_property,
-            models.ModelsProperty(name="phone_number", pii_type_name="PHONE_NUMBER", is_nullable=True),
-            models.ModelsProperty(name="zip_code_us", pii_type_name="ZIP_CODE_US", is_nullable=True),
+            models.ModelProperty(name="phone_number", pii_type_name="PHONE_NUMBER", is_nullable=True),
+            models.ModelProperty(name="zip_code_us", pii_type_name="ZIP_CODE_US", is_nullable=True),
         ]
     )
 
@@ -74,15 +73,15 @@ def main():
 
     print('\n\n== Step 4: Add data ==\n\n')
 
-    customer1 = models.ModelsObject(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123", zip_code_us="12345")
-    customer2 = models.ModelsObject(ssn="123-12-1235", email="mary@somemail.com", phone_number="+1-121212124", zip_code_us="12345")
-    customer3 = models.ModelsObject(ssn="123-12-1236", email="eric@somemail.com", phone_number="+1-121212125", zip_code_us="12345")
+    customer1 = models.Object(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123", zip_code_us="12345")
+    customer2 = models.Object(ssn="123-12-1235", email="mary@somemail.com", phone_number="+1-121212124", zip_code_us="12345")
+    customer3 = models.Object(ssn="123-12-1236", email="eric@somemail.com", phone_number="+1-121212125", zip_code_us="12345")
 
-    customer1_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, models_object=customer1)
+    customer1_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object=customer1)
     print(customer1_id)
-    customer2_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, models_object=customer2)
+    customer2_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object=customer2)
     print(customer2_id)
-    customer3_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, models_object=customer3)
+    customer3_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object=customer3)
     print(customer3_id)
 
     id_to_customer = {customer1_id.id: customer1, customer2_id.id: customer2, customer3_id.id: customer3}
@@ -90,7 +89,7 @@ def main():
     response = objects_manager.search_objects(
         collection=customers_collection.name, 
         reason=APP_FUNCTIONALITY_REASON, 
-        models_query=models.ModelsQuery(match=models.ModelsQueryMap(email="john@somemail.com")),
+        query=models.Query(match=models.QueryMap(email="john@somemail.com")),
         props=["_id"],
     )
 
@@ -101,7 +100,7 @@ def main():
 
     print('\n\n== Step 5: Tokenize data ==\n\n')
 
-    token_request = models.ModelsTokenizeRequest(
+    token_request = models.TokenizeRequest(
         object_ids=[customer1_id.id],
         props=[email_property.name], type="POINTER",
         reversible=True)
@@ -110,14 +109,14 @@ def main():
                                        token_request)[0]
     print("Token:", token_id)
 
-    search_token_request = models.ModelsQueryToken(object_id=[customer1_id.id])
+    search_token_request = models.QueryToken(object_ids=[customer1_id.id])
     token_ids = tokens_manager.search_tokens(customers_collection.name, APP_FUNCTIONALITY_REASON, search_token_request)
 
     assert token_ids[0].token_id == token_id['token_id'], f"{token_ids[0].token_id = } != {token_id['token_id'] = }"
 
     detokenized = tokens_manager.detokenize(
         customers_collection.name,
-        reason=APP_FUNCTIONALITY_REASON, token_id=[token_id.token_id])
+        reason=APP_FUNCTIONALITY_REASON, token_ids=[token_id.token_id])
     
     assert len(detokenized) == 1
     detokenized = detokenized[0]
@@ -127,7 +126,7 @@ def main():
 
     print('\n\n== Step 6: Query your data ==\n\n')
 
-    all_customers = objects_manager.get_objects(customers_collection.name, APP_FUNCTIONALITY_REASON, page_size=1, options=['unsafe'])
+    all_customers = objects_manager.list_objects(customers_collection.name, APP_FUNCTIONALITY_REASON, page_size=1, options=['unsafe'])
     print(all_customers)
     assert all_customers.paging.cursor
     assert all_customers.paging.size + all_customers.paging.remaining_count == 3
@@ -138,11 +137,11 @@ def main():
 
     # Now getting only the SSN
     
-    customer1_ssn_from_get = objects_manager.get_objects(
+    customer1_ssn_from_get = objects_manager.list_objects(
         customers_collection.name, 
         APP_FUNCTIONALITY_REASON, 
         props=[ssn_property.name],
-        id=[customer1_id.id])
+        ids=[customer1_id.id])
     assert len(customer1_ssn_from_get.results) > 0
     print(customer1_ssn_from_get.results[0])
     ssn_from_get = customer1_ssn_from_get.results[0]['ssn']
@@ -151,30 +150,27 @@ def main():
 
     # Getting all the details of customer1
 
-    customer1_from_get = objects_manager.get_objects(
+    customer1_from_get = objects_manager.list_objects(
         customers_collection.name, 
         APP_FUNCTIONALITY_REASON, 
         options=[UNSAFE_OPTION],
-        id=[customer1_id.id])
+        ids=[customer1_id.id])
     
     assert len(customer1_from_get.results) > 0
     assert customer1_from_get.results[0].email == customer1.email
     print(customer1_from_get.results[0])
-    
-    
 
     # Getting Customer1's data with masks
 
-    customer1_masked = objects_manager.get_objects(
+    customer1_masked = objects_manager.list_objects(
         customers_collection.name, 
         APP_FUNCTIONALITY_REASON, 
         props=['ssn.mask', 'email.mask', 'phone_number.mask'],
-        id=[customer1_id.id])
+        ids=[customer1_id.id])
     
     assert len(customer1_masked.results) > 0
     assert customer1_masked.results[0]['ssn.mask'] == '***-**-1234'
     print(customer1_masked.results[0])
-    
 
     print('\n\n== Step 7: Delete data ==\n\n')
     # Deleting the token
@@ -182,7 +178,7 @@ def main():
     tokens_manager.delete_tokens(
         collection=customers_collection.name,
         reason=APP_FUNCTIONALITY_REASON,
-        token_id=[token_id.token_id])
+        token_ids=[token_id.token_id])
     
     token_ids = tokens_manager.search_tokens(customers_collection.name, APP_FUNCTIONALITY_REASON, search_token_request)
     assert len(token_ids) == 0
@@ -190,19 +186,20 @@ def main():
     # Deleting the customer
 
     objects_manager.delete_object_by_id(
-        customers_collection.name, id=[customer1_id.id], reason=APP_FUNCTIONALITY_REASON)
+        customers_collection.name, ids=[customer1_id.id], reason=APP_FUNCTIONALITY_REASON)
     
     try:
-        customer1_from_get = objects_manager.get_objects(
+        customer1_from_get = objects_manager.list_objects(
             customers_collection.name, 
             APP_FUNCTIONALITY_REASON, 
             options=[UNSAFE_OPTION],
-            id=[customer1_id.id])
+            ids=[customer1_id.id])
     except openapi_client.exceptions.NotFoundException:
         pass
     else:
         raise Exception("Object still exists!")
     print('Done!\n')
+
 
 if __name__ == '__main__':
     main()

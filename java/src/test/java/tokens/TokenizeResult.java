@@ -1,7 +1,7 @@
 package tokens;
 
 
-import org.openapitools.client.model.ModelsTokenValue;
+import org.openapitools.client.model.TokenValue;
 
 import java.util.*;
 
@@ -11,11 +11,11 @@ import java.util.*;
 //   made by tokenize that the List<ModelsTokenValue> that it returns is ordered
 //   by the objectIds that it is passed.
 class TokenizeResult {
-    private final List<ModelsTokenValue> tokenValues;
+    private final List<TokenValue> tokenValues;
     private final Map<UUID, String> objectIdToTokenId = new TreeMap<>();
     private final Map<String, List<UUID>> tokenIdToObjectIds = new TreeMap<>();
 
-    TokenizeResult(List<UUID> objectIds, List<ModelsTokenValue> tokenValues) {
+    TokenizeResult(List<UUID> objectIds, List<TokenValue> tokenValues) {
         this.tokenValues = tokenValues;
 
         for (int i = 0; i < objectIds.size(); i++) {
@@ -32,7 +32,7 @@ class TokenizeResult {
         }
     }
 
-    List<ModelsTokenValue> getTokenValues() {
+    List<TokenValue> getTokenValues() {
         return tokenValues;
     }
 

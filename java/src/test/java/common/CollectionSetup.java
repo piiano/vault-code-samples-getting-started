@@ -5,7 +5,7 @@ import collections.CollectionsClient;
 import objects.ObjectsClient;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
-import org.openapitools.client.model.ModelsCollection;
+import org.openapitools.client.model.Collection;
 
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -17,7 +17,7 @@ public class CollectionSetup {
     private final ObjectsClient objectsClient = new ObjectsClient(apiClient);
     private final String collectionName = "customers";
 
-    private ModelsCollection collection;
+    private Collection collection;
     public Map<UUID, Map<String, Object>> mapObjectIdToObjectFields;
     private ArrayList<UUID> objectIds;
 
@@ -25,7 +25,7 @@ public class CollectionSetup {
         return objectIds;
     }
 
-    public ModelsCollection getCollection(){
+    public Collection getCollection(){
         return collection;
     }
 
@@ -41,9 +41,9 @@ public class CollectionSetup {
         deleteCollectionIfExists(collectionsClient, collectionName);
     }
 
-    private ModelsCollection addCollection() throws ApiException {
+    private Collection addCollection() throws ApiException {
 
-        ModelsCollection collection = Factory.createCollection(collectionName);
+        Collection collection = Factory.createCollection(collectionName);
 
         deleteCollectionIfExists(collectionsClient, collection.getName());
         return collectionsClient.add(collection);

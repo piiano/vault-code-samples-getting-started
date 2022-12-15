@@ -5,7 +5,6 @@ import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.CollectionsApi;
 import org.openapitools.client.model.*;
-
 import java.util.List;
 
 public class CollectionsClient {
@@ -19,7 +18,7 @@ public class CollectionsClient {
         collections = new CollectionsApi(client);
     }
 
-    public ModelsCollection add(ModelsCollection collection) throws ApiException {
+    public Collection add(Collection collection) throws ApiException {
         return collections.addCollection(collection, format, options);
     }
 
@@ -27,11 +26,11 @@ public class CollectionsClient {
         collections.deleteCollection(collectionName);
     }
 
-    public static ModelsProperty createProp(
+    public static Property createProp(
             String name, String piiTypeName, String description,
             boolean isUnique, boolean isNullable, boolean isEncrypted, boolean isIndex) {
 
-        ModelsProperty property = new ModelsProperty();
+        Property property = new Property();
         property.setName(name);
         property.setPiiTypeName(piiTypeName);
         property.setDescription(description);
