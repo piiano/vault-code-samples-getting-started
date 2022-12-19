@@ -63,34 +63,34 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @MethodSource("tokenizationTypeAndDeleted")
-    public void cannotDetokenizeDeletedObjects(
-        TokenizeRequest.TypeEnum tokenType, boolean detokenizeDeleted) throws ApiException, JsonProcessingException {
+    @MethodSource("tokenizationTypeAndArchived")
+    public void cannotDetokenizeArchivedObjects(
+        TokenizeRequest.TypeEnum tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
 
         batchTokenize(tokenType);
 
         var firstObjectId = setup.getObjectIds().get(0);
         objectsClient.deleteById(setup.getCollection().getName(), List.of(firstObjectId));
 
-        assertIncorrectBehavior(detokenizeDeleted);
+        assertIncorrectBehavior(detokenizeArchived);
     }
 
     @ParameterizedTest
-    @MethodSource("tokenizationTypeAndDeleted")
-    public void cannotDetokenizeDeletedTokens(
-        TokenizeRequest.TypeEnum tokenType, boolean detokenizeDeleted) throws ApiException, JsonProcessingException {
+    @MethodSource("tokenizationTypeAndArchived")
+    public void cannotDetokenizeArchivedTokens(
+        TokenizeRequest.TypeEnum tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
 
         // Batch tokenize
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
 
-        // Delete the token of the first object
+        // Archive the token of the first object
         var firstObjectId = setup.getObjectIds().get(0);
         var tokenIdOfFirstObjectId = tokenizeResult.getTokenId(firstObjectId);
-        tokensClient.deleteTokens(
+        tokensClient.archiveTokens(
             setup.getCollection().getName(), TokenDefinition.fromTokenIds(List.of(tokenIdOfFirstObjectId)));
 
         // Should succeed but now test that the incorrect result occurs
-        assertIncorrectBehavior(detokenizeDeleted);
+        assertIncorrectBehavior(detokenizeArchived);
     }
 
     @ParameterizedTest
@@ -153,10 +153,10 @@ public class TestTokens {
 
         // and verify that all token ids are present and are associated with the correct object id.
         // Enable this assertion in the release
-        // assertSearchResultsMatchTokenizeResult(tokenizeResult, searchResult);
+        assertSearchResultsMatchTokenizeResult(tokenizeResult, searchResult);
     }
 
-    private static Stream<Arguments> tokenizationTypeAndDeleted() {
+    private static Stream<Arguments> tokenizationTypeAndArchived() {
         return Stream.of(
             arguments(TokenizeRequest.TypeEnum.POINTER, true),
             arguments(TokenizeRequest.TypeEnum.POINTER, false),
@@ -256,9 +256,9 @@ public class TestTokens {
         Assertions.assertEquals(expectedTokenIds, actualTokenIds);
     }
 
-    // See https://github.com/piiano/vault/issues/1847
-    private void assertIncorrectBehavior(boolean detokenizeDeleted) throws JsonProcessingException, ApiException {
-        if (detokenizeDeleted) {
+    // See https://github.com/piiano/vault/issues/2047
+    private void assertIncorrectBehavior(boolean detokenizeArchived) throws JsonProcessingException, ApiException {
+        if (detokenizeArchived) {
             ApiMethod detokenizeMethod = () -> tokensClient.detokenize(
                 setup.getCollection().getName(),
                 TokenDefinition.fromTags(tags), false, true);

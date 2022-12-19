@@ -29,19 +29,19 @@ public class TokensClient {
         return collections.tokenize(collectionName, reason, modelsTokenizeRequest, ttl, noAdhocReason, reloadCache);
     }
 
-    public List<DetokenizedToken> detokenize(String collectionName, TokenDefinition tokens, boolean includeMetadata, boolean deleted) throws ApiException {
+    public List<DetokenizedToken> detokenize(String collectionName, TokenDefinition tokens, boolean includeMetadata, boolean archived) throws ApiException {
         List<String> options = new ArrayList<>();
         if (includeMetadata) {
             options.add("include_metadata");
         }
-        if (deleted) {
-            options.add("deleted");
+        if (archived) {
+            options.add("archived");
         }
         return collections.detokenize(collectionName, reason, tokens.objectIds(), options, tokens.tags(), tokens.tokenIds(), noAdhocReason, reloadCache);
     }
 
-    public void deleteTokens(String collectionName, TokenDefinition tokens) throws ApiException {
-        collections.deleteTokens(collectionName, reason, tokens.objectIds(), tokens.tags(), tokens.tokenIds(), options, noAdhocReason, reloadCache);
+    public void archiveTokens(String collectionName, TokenDefinition tokens) throws ApiException {
+        collections.updateTokens(collectionName, reason, new UpdateTokenRequest(), "0", tokens.objectIds(), tokens.tags(), tokens.tokenIds(), options, noAdhocReason, reloadCache);
     }
 
     public List<TokenMetadata> searchTokens(String collectionName, QueryToken modelsQueryToken) throws ApiException {
