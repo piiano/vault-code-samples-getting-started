@@ -1,6 +1,7 @@
 package tokens;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableList;
 import common.*;
 import objects.ObjectsClient;
 import org.junit.jupiter.api.AfterEach;
@@ -28,8 +29,8 @@ public class TestTokens {
     private final TokensClient tokensClient = new TokensClient(apiClient);
     private final CollectionSetup setup = new CollectionSetup();
 
-    private final List<String> props = List.of("_id", "ssn", "email");
-    private final List<String> tags = List.of("token_tag_1");
+    private final List<String> props = ImmutableList.of("_id", "ssn", "email");
+    private final List<String> tags = ImmutableList.of("token_tag_1");
 
     @BeforeEach()
     public void beforeEach() throws ApiException {
@@ -42,8 +43,8 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(ModelsTokenizeRequest.TypeEnum.class)
-    public void batchTokenizeAndBatchDetokenize(ModelsTokenizeRequest.TypeEnum tokenType) throws ApiException {
+    @EnumSource(TokenizeRequest.TypeEnum.class)
+    public void batchTokenizeAndBatchDetokenize(TokenizeRequest.TypeEnum tokenType) throws ApiException {
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizedResult = batchDetokenize();
 
@@ -52,8 +53,8 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(ModelsTokenizeRequest.TypeEnum.class)
-    public void batchTokenizeAndSingleDetokenize(ModelsTokenizeRequest.TypeEnum tokenType) throws ApiException {
+    @EnumSource(TokenizeRequest.TypeEnum.class)
+    public void batchTokenizeAndSingleDetokenize(TokenizeRequest.TypeEnum tokenType) throws ApiException {
 
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizeResult = singleDetokenize(tokenizeResult);
@@ -63,45 +64,45 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @MethodSource("tokenizationTypeAndDeleted")
-    public void cannotDetokenizeDeletedObjects(
-        ModelsTokenizeRequest.TypeEnum tokenType, boolean detokenizeDeleted) throws ApiException, JsonProcessingException {
+    @MethodSource("tokenizationTypeAndArchived")
+    public void cannotDetokenizeArchivedObjects(
+        TokenizeRequest.TypeEnum tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
 
         batchTokenize(tokenType);
 
         var firstObjectId = setup.getObjectIds().get(0);
         objectsClient.deleteById(setup.getCollection().getName(), List.of(firstObjectId));
 
-        assertIncorrectBehavior(detokenizeDeleted);
+        assertIncorrectBehavior(detokenizeArchived);
     }
 
     @ParameterizedTest
-    @MethodSource("tokenizationTypeAndDeleted")
-    public void cannotDetokenizeDeletedTokens(
-        ModelsTokenizeRequest.TypeEnum tokenType, boolean detokenizeDeleted) throws ApiException, JsonProcessingException {
+    @MethodSource("tokenizationTypeAndArchived")
+    public void cannotDetokenizeArchivedTokens(
+        TokenizeRequest.TypeEnum tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
 
         // Batch tokenize
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
 
-        // Delete the token of the first object
+        // Archive the token of the first object
         var firstObjectId = setup.getObjectIds().get(0);
         var tokenIdOfFirstObjectId = tokenizeResult.getTokenId(firstObjectId);
-        tokensClient.deleteTokens(
+        tokensClient.archiveTokens(
             setup.getCollection().getName(), TokenDefinition.fromTokenIds(List.of(tokenIdOfFirstObjectId)));
 
         // Should succeed but now test that the incorrect result occurs
-        assertIncorrectBehavior(detokenizeDeleted);
+        assertIncorrectBehavior(detokenizeArchived);
     }
 
     @ParameterizedTest
-    @EnumSource(ModelsTokenizeRequest.TypeEnum.class)
-    public void successfullyDetokenizeWithRotatedTokens(ModelsTokenizeRequest.TypeEnum tokenType) throws ApiException, JsonProcessingException {
+    @EnumSource(TokenizeRequest.TypeEnum.class)
+    public void successfullyDetokenizeWithRotatedTokens(TokenizeRequest.TypeEnum tokenType) throws ApiException, JsonProcessingException {
 
         // Tokenize
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
 
         // Rotate the tokens
-        List<ModelsRotatedToken> rotatedTokens = tokensClient.rotateTokens(
+        Map<String, String> rotatedTokens = tokensClient.rotateTokens(
             setup.getCollection().getName(),
             tokenizeResult.getTokenIds());
 
@@ -125,8 +126,8 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(ModelsTokenizeRequest.TypeEnum.class)
-    public void successfullyUpdateTokens(ModelsTokenizeRequest.TypeEnum tokenType) throws ApiException {
+    @EnumSource(TokenizeRequest.TypeEnum.class)
+    public void successfullyUpdateTokens(TokenizeRequest.TypeEnum tokenType) throws ApiException {
 
         // Tokenize
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
@@ -134,7 +135,7 @@ public class TestTokens {
         // Update the tags on all tokens.
         List<String> newTags = List.of("New tag");
 
-        ModelsUpdateTokenRequest updateTokenRequest = new ModelsUpdateTokenRequest();
+        UpdateTokenRequest updateTokenRequest = new UpdateTokenRequest();
         updateTokenRequest.setTags(newTags);
 
         tokensClient.updateTokens(
@@ -143,30 +144,30 @@ public class TestTokens {
             updateTokenRequest);
 
         // Search tokens by the new tags.
-        var queryToken = new ModelsQueryToken();
-        queryToken.setTag(newTags);
+        var queryToken = new QueryToken();
+        queryToken.setTags(newTags);
 
-        List<ModelsTokenMetadata> tokenMetadata = tokensClient.searchTokens(
+        List<TokenMetadata> tokenMetadata = tokensClient.searchTokens(
             setup.getCollection().getName(), queryToken);
 
         SearchResult searchResult = new SearchResult(tokenMetadata);
 
         // and verify that all token ids are present and are associated with the correct object id.
         // Enable this assertion in the release
-        // assertSearchResultsMatchTokenizeResult(tokenizeResult, searchResult);
+        assertSearchResultsMatchTokenizeResult(tokenizeResult, searchResult);
     }
 
-    private static Stream<Arguments> tokenizationTypeAndDeleted() {
+    private static Stream<Arguments> tokenizationTypeAndArchived() {
         return Stream.of(
-            arguments(ModelsTokenizeRequest.TypeEnum.POINTER, true),
-            arguments(ModelsTokenizeRequest.TypeEnum.POINTER, false),
-            arguments(ModelsTokenizeRequest.TypeEnum.VALUE, true),
-            arguments(ModelsTokenizeRequest.TypeEnum.VALUE, false)
+            arguments(TokenizeRequest.TypeEnum.POINTER, true),
+            arguments(TokenizeRequest.TypeEnum.POINTER, false),
+            arguments(TokenizeRequest.TypeEnum.VALUE, true),
+            arguments(TokenizeRequest.TypeEnum.VALUE, false)
         );
     }
 
     // Batch tokenize the 'props' of the 'objectIds' adding the 'tags' to each token.
-    private TokenizeResult batchTokenize(ModelsTokenizeRequest.TypeEnum tokenType) throws ApiException {
+    private TokenizeResult batchTokenize(TokenizeRequest.TypeEnum tokenType) throws ApiException {
         return new TokenizeResult(
             setup.getObjectIds(),
             tokensClient.tokenize(
@@ -174,10 +175,10 @@ public class TestTokens {
                 createTokenizeRequest(tokenType, setup.getObjectIds(), props, tags)));
     }
 
-    private ModelsTokenizeRequest createTokenizeRequest(
-        ModelsTokenizeRequest.TypeEnum typeEnum,
-        List<UUID> ids, List<String> props, List<String> tags) {
-        ModelsTokenizeRequest request = new ModelsTokenizeRequest();
+    private TokenizeRequest createTokenizeRequest(
+        TokenizeRequest.TypeEnum typeEnum, List<UUID> ids, List<String> props, List<String> tags) {
+
+        TokenizeRequest request = new TokenizeRequest();
         request.setTags(tags);
         request.setType(typeEnum);
         request.setReuseTokenId(false);
@@ -189,7 +190,7 @@ public class TestTokens {
 
     // singleDetokenize calls detokenize for all tokens in tokenResult, but one by one.
     private DetokenizeResult singleDetokenize(TokenizeResult tokenizeResult) throws ApiException {
-        var detokenizedTokens = new ArrayList<ModelsDetokenizedToken>();
+        var detokenizedTokens = new ArrayList<DetokenizedToken>();
 
         // Detokenize each token and collect the detokenized tokens
         for (var tokenValue : tokenizeResult.getTokenValues()) {
@@ -243,22 +244,22 @@ public class TestTokens {
     }
 
     private void assertDetokenizeReturnsExpectedTokenIds(
-        List<ModelsTokenValue> tokenValues, List<ModelsDetokenizedToken> deTokenizedTokens) {
+        List<TokenValue> tokenValues, List<DetokenizedToken> deTokenizedTokens) {
 
         // Get the set of tokenIds from the tokenized values
         var expectedTokenIds = tokenValues.stream().map(
-            ModelsTokenValue::getTokenId).collect(Collectors.toCollection(HashSet::new));
+            TokenValue::getTokenId).collect(Collectors.toCollection(HashSet::new));
 
         // Get the set of tokenIds from the detokenized tokens
         var actualTokenIds = deTokenizedTokens.stream().map(
-            ModelsDetokenizedToken::getTokenId).collect(Collectors.toCollection(HashSet::new));
+            DetokenizedToken::getTokenId).collect(Collectors.toCollection(HashSet::new));
 
         Assertions.assertEquals(expectedTokenIds, actualTokenIds);
     }
 
-    // See https://github.com/piiano/vault/issues/1847
-    private void assertIncorrectBehavior(boolean detokenizeDeleted) throws JsonProcessingException, ApiException {
-        if (detokenizeDeleted) {
+    // See https://github.com/piiano/vault/issues/2047
+    private void assertIncorrectBehavior(boolean detokenizeArchived) throws JsonProcessingException, ApiException {
+        if (detokenizeArchived) {
             ApiMethod detokenizeMethod = () -> tokensClient.detokenize(
                 setup.getCollection().getName(),
                 TokenDefinition.fromTags(tags), false, true);

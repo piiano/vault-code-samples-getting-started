@@ -30,6 +30,6 @@ jobs:
            -e PVAULT_DEVMODE=true \
            -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
            -d \
-           piiano/pvault-dev:0.9.8
+           piiano/pvault-dev:latest
          sleep 10
          cd python && ./run.sh

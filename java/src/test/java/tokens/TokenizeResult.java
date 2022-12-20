@@ -1,21 +1,20 @@
 package tokens;
 
-
-import org.openapitools.client.model.ModelsTokenValue;
+import org.openapitools.client.model.TokenValue;
 
 import java.util.*;
 
 // TokenizeResult contains all the information returned by the tokenize API method.
 // - The token values.
 // - Maps of token  to object ids and vice versa based on the guarantee
-//   made by tokenize that the List<ModelsTokenValue> that it returns is ordered
+//   made by tokenize that the List<TokenValue> that it returns is ordered
 //   by the objectIds that it is passed.
 class TokenizeResult {
-    private final List<ModelsTokenValue> tokenValues;
+    private final List<TokenValue> tokenValues;
     private final Map<UUID, String> objectIdToTokenId = new TreeMap<>();
     private final Map<String, List<UUID>> tokenIdToObjectIds = new TreeMap<>();
 
-    TokenizeResult(List<UUID> objectIds, List<ModelsTokenValue> tokenValues) {
+    TokenizeResult(List<UUID> objectIds, List<TokenValue> tokenValues) {
         this.tokenValues = tokenValues;
 
         for (int i = 0; i < objectIds.size(); i++) {
@@ -32,7 +31,7 @@ class TokenizeResult {
         }
     }
 
-    List<ModelsTokenValue> getTokenValues() {
+    List<TokenValue> getTokenValues() {
         return tokenValues;
     }
 

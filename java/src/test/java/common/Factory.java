@@ -1,17 +1,18 @@
 package common;
 
 import collections.CollectionsClient;
-import org.openapitools.client.ApiException;
-import org.openapitools.client.model.ModelsCollection;
+import org.openapitools.client.model.Collection;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Factory {
 
-    public static ModelsCollection createCollection(String collectionName) {
-        ModelsCollection collection = new ModelsCollection();
+    public static Collection createCollection(String collectionName) {
+        Collection collection = new Collection();
         collection.setName(collectionName);
-        collection.setType(ModelsCollection.TypeEnum.PERSONS);
+        collection.setType(Collection.TypeEnum.PERSONS);
 
         collection.addPropertiesItem(
             CollectionsClient.createProp("ssn", "SSN", "Social security number",
@@ -36,17 +37,17 @@ public class Factory {
             createObject(
                 "123-12-1234",
                 "john@somemail.com",
-                "+1-121212123",
+                "+1121212123",
                 "12345"),
             createObject(
                 "123-12-1235",
                 "mary@somemail.com",
-                "+1-121212124",
+                "+1121212124",
                 "12345"),
             createObject(
                 "123-12-1236",
                 "eric@somemail.com",
-                "+1-121212125",
+                "+1121212125",
                 "12345")
         );
     }

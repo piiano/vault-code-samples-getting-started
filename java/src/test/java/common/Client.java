@@ -13,8 +13,8 @@ public class Client {
     public static final String NO_ADHOC_REASON = "";
     public static final String APP_FUNCTIONALITY_REASON = "AppFunctionality";
     public static final String USE_DEFAULT_TTL = "";
-    public static final Boolean reloadCache = false;
-
+    public static final Boolean RELOAD_CACHE = false;
+    public static final String JSON = "json";
     public static final List<String> NO_OPTIONS = emptyList();
 
     public static ApiClient create() {

@@ -1,7 +1,6 @@
 package tokens;
 
-import org.openapitools.client.model.ModelsRotatedToken;
-import org.openapitools.client.model.ModelsTokenValue;
+import org.openapitools.client.model.TokenValue;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -12,12 +11,8 @@ import java.util.stream.Collectors;
 class RotateResult {
     private final Map<String, String> oldTokenIdToNewTokenId = new TreeMap<>();
 
-    RotateResult(List<ModelsRotatedToken> rotatedTokens) {
-        for (var rotatedToken : rotatedTokens) {
-            String newTokenId = rotatedToken.getNewTokenId();
-            String oldTokenId = rotatedToken.getOldTokenId();
-            oldTokenIdToNewTokenId.put(oldTokenId, newTokenId);
-        }
+    RotateResult(Map<String, String> rotatedTokens) {
+        oldTokenIdToNewTokenId.putAll(rotatedTokens);
     }
 
     String getNewTokenId(String oldTokenId) {
@@ -38,8 +33,8 @@ class RotateResult {
             newTokenValues);
     }
 
-    ModelsTokenValue toTokenValue(String tokenId) {
-        var newTokenValue = new ModelsTokenValue();
+    TokenValue toTokenValue(String tokenId) {
+        var newTokenValue = new TokenValue();
         newTokenValue.setTokenId(tokenId);
         return newTokenValue;
     }

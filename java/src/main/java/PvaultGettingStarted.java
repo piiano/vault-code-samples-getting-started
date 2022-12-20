@@ -3,9 +3,11 @@ import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
 import org.openapitools.client.api.*;
-import org.openapitools.client.model.*;
+import org.openapitools.client.model.Collection;
+import org.openapitools.client.model.ObjectFieldsPage;
+import org.openapitools.client.model.Property;
+import org.openapitools.client.model.TokenizeRequest;
 
-import javax.management.RuntimeErrorException;
 import java.util.*;
 
 import static java.util.Collections.emptyList;
@@ -31,7 +33,6 @@ public class PvaultGettingStarted {
 
         print("\n\n== Step 3: Create a collection ==\n\n");
         CollectionsApi collectionsApi = new CollectionsApi(pvaultClient);
-        // deleteCollection(collectionsApi);
         verifyNoCollections(collectionsApi);
         createCollection(collectionsApi);
 
@@ -76,15 +77,16 @@ public class PvaultGettingStarted {
             // test collection wasn't exist, continue test..
         }
     }
+
     // for safety reasons refuse to run if the collection already exists
-    private static void verifyNoCollections(CollectionsApi collectionApi) throws ApiException {
+    private static void verifyNoCollections(CollectionsApi collectionsApi) throws ApiException {
         print("Verifying the test collection is not present");
         try {
-            List<ModelsProperty> mp =
-            collectionApi.listCollectionProperties(COLLECTION_NAME,new ArrayList<>());
-            throw new RuntimeException("Collection " + COLLECTION_NAME + " already exists.\n" +
-                  "Recreate the Vault from scratch or uncomment deleteCollection()" +
-                  " in this code. Bailing out.\n");
+            // deleteCollection(collectionsApi);
+            collectionsApi.getCollection(COLLECTION_NAME, JSON, emptyList());
+            print("Collection " + COLLECTION_NAME + " already exists.");
+            print("Recreate the Vault from scratch or uncomment deleteCollection() in this code. Bailing out.\n");
+            assert false;
         } catch (ApiException e) {
             if (e.getCode() == 404) {
                 print("Collection "  + COLLECTION_NAME + " not found. Will create it");
@@ -96,27 +98,27 @@ public class PvaultGettingStarted {
     }
 
     private static void createCollection(CollectionsApi collectionApi) throws ApiException {
-        // Note: Adding a collection with pvschema is not supported in the SDK
+        // Note: Adding a collection with 'PVSCHEMA' is not supported in the SDK
         // Throughout this code we will use JSON exclusively.
 
-        ModelsCollection collection = new ModelsCollection();
+        Collection collection = new Collection();
         collection.setName(COLLECTION_NAME);
-        collection.setType(ModelsCollection.TypeEnum.PERSONS);
+        collection.setType(Collection.TypeEnum.PERSONS);
 
         collection.addPropertiesItem(
-                buildModelsProperty("ssn", "SSN", "Social security number",
+                buildProperty("ssn", "SSN", "Social security number",
                 true, false, true, false));
 
         collection.addPropertiesItem(
-                buildModelsProperty("email", "EMAIL", "EMAIL",
+                buildProperty("email", "EMAIL", "EMAIL",
                         false, false, true, false));
 
         collection.addPropertiesItem(
-                buildModelsProperty("phone_number", "PHONE_NUMBER", "PHONE_NUMBER",
+                buildProperty("phone_number", "PHONE_NUMBER", "PHONE_NUMBER",
                         false, true, true, false));
 
         collection.addPropertiesItem(
-                buildModelsProperty("zip_code_us", "ZIP_CODE_US", "ZIP_CODE_US",
+                buildProperty("zip_code_us", "ZIP_CODE_US", "ZIP_CODE_US",
                         false, true, true, false));
 
         collectionApi.addCollection(collection, JSON, NO_OPTIONS);
@@ -161,10 +163,10 @@ public class PvaultGettingStarted {
 
     private static String tokenizeData(UUID id, TokensApi tokensApi) throws ApiException {
 
-        ModelsTokenizeRequest tokenizeRequest = new ModelsTokenizeRequest();
+        TokenizeRequest tokenizeRequest = new TokenizeRequest();
         tokenizeRequest.addObjectIdsItem(id);
         tokenizeRequest.addPropsItem("email");
-        tokenizeRequest.setType(ModelsTokenizeRequest.TypeEnum.POINTER);
+        tokenizeRequest.setType(TokenizeRequest.TypeEnum.POINTER);
         tokenizeRequest.setTags(ImmutableList.of("token_tag"));
 
         String token = tokensApi.tokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, tokenizeRequest,
@@ -183,24 +185,23 @@ public class PvaultGettingStarted {
 
     private static void queryAllObjectsWithPageSize(ObjectsApi objectsApi) throws ApiException {
 
-        ModelsObjectFieldsPage objectIdsPage =
-                objectsApi.getObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, NO_ADHOC_REASON,
-                        false, 1, "", emptyList(), ImmutableList.of(UNSAFE_OPTION), null);
-
+        ObjectFieldsPage objectIdsPage =
+                objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, NO_ADHOC_REASON,
+                        false, 1, "", "", emptyList(), ImmutableList.of(UNSAFE_OPTION), null);
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
 
         print("object retrieved by search: ", searchResult.toString());
         assert "john@somemail.com".equals(searchResult.get("email"));
         assert "123-12-1234".equals(searchResult.get("ssn"));
-        assert "+1-121212123".equals(searchResult.get("phone_number"));
+        assert "+1121212123".equals(searchResult.get("phone_number"));
         assert "12345".equals(searchResult.get("zip_code_us"));
     }
 
     private static void queryPropertiesOfObjectsById(ObjectsApi objectsApi, UUID id) throws ApiException {
 
-        ModelsObjectFieldsPage objectIdsPage = objectsApi.getObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
-                NO_ADHOC_REASON, false, null, "", ImmutableList.of(id),
+        ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
+                NO_ADHOC_REASON, false, null, "","", ImmutableList.of(id),
                 emptyList(), ImmutableList.of("ssn"));
 
         assert objectIdsPage.getResults().size() == 1;
@@ -213,8 +214,8 @@ public class PvaultGettingStarted {
 
     private static void getTransformedPropertiesOfObjects(ObjectsApi objectsApi, UUID id) throws ApiException {
 
-        ModelsObjectFieldsPage objectIdsPage = objectsApi.getObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
-                NO_ADHOC_REASON, false, null, "", ImmutableList.of(id),
+        ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
+                NO_ADHOC_REASON, false, null, "", "", ImmutableList.of(id),
                 emptyList(), ImmutableList.of("ssn.mask", "email.mask", "phone_number.mask"));
 
         assert objectIdsPage.getResults().size() == 1;
@@ -223,7 +224,7 @@ public class PvaultGettingStarted {
         print("transformed propertied retrieved: ", searchResult.toString());
         assert "j***@somemail.com".equals(searchResult.get("email.mask"));
         assert "***-**-1234".equals(searchResult.get("ssn.mask"));
-        assert "********2123".equals(searchResult.get("phone_number.mask"));
+        assert "*******2123".equals(searchResult.get("phone_number.mask"));
     }
 
     private static void deleteToken(TokensApi tokensApi, String token) throws ApiException {
@@ -248,11 +249,11 @@ public class PvaultGettingStarted {
         return pvaultClient;
     }
 
-    private static ModelsProperty buildModelsProperty(
+    private static Property buildProperty(
             String name, String piiTypeName, String description,
             boolean isUnique, boolean isNullable, boolean isEncrypted, boolean isIndex) {
 
-        ModelsProperty property = new ModelsProperty();
+        Property property = new Property();
         property.setName(name);
         property.setPiiTypeName(piiTypeName);
         property.setDescription(description);

@@ -1,12 +1,12 @@
 package tokens;
 
-import org.openapitools.client.model.ModelsDetokenizedToken;
+import org.openapitools.client.model.DetokenizedToken;
 
-import java.util.*;
+import java.util.List;
 
-record DetokenizeResult(List<ModelsDetokenizedToken> detokenizedTokens) {
+record DetokenizeResult(List<DetokenizedToken> detokenizedTokens) {
 
-    List<ModelsDetokenizedToken> getDetokenizedTokens() {
+    List<DetokenizedToken> getDetokenizedTokens() {
         return detokenizedTokens;
     }
 }
