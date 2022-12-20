@@ -1,6 +1,5 @@
 package common;
 
-
 import collections.CollectionsClient;
 import objects.ObjectsClient;
 import org.openapitools.client.ApiClient;
@@ -8,7 +7,10 @@ import org.openapitools.client.ApiException;
 import org.openapitools.client.model.Collection;
 
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.UUID;
 
 public class CollectionSetup {
 

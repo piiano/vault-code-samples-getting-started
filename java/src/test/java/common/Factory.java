@@ -1,10 +1,11 @@
 package common;
 
 import collections.CollectionsClient;
-import org.openapitools.client.ApiException;
 import org.openapitools.client.model.Collection;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Factory {
 
