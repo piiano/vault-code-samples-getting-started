@@ -106,19 +106,19 @@ public class PvaultGettingStarted {
         collection.setType(Collection.TypeEnum.PERSONS);
 
         collection.addPropertiesItem(
-                buildModelProperty("ssn", "SSN", "Social security number",
+                buildProperty("ssn", "SSN", "Social security number",
                 true, false, true, false));
 
         collection.addPropertiesItem(
-                buildModelProperty("email", "EMAIL", "EMAIL",
+                buildProperty("email", "EMAIL", "EMAIL",
                         false, false, true, false));
 
         collection.addPropertiesItem(
-                buildModelProperty("phone_number", "PHONE_NUMBER", "PHONE_NUMBER",
+                buildProperty("phone_number", "PHONE_NUMBER", "PHONE_NUMBER",
                         false, true, true, false));
 
         collection.addPropertiesItem(
-                buildModelProperty("zip_code_us", "ZIP_CODE_US", "ZIP_CODE_US",
+                buildProperty("zip_code_us", "ZIP_CODE_US", "ZIP_CODE_US",
                         false, true, true, false));
 
         collectionApi.addCollection(collection, JSON, NO_OPTIONS);
@@ -249,7 +249,7 @@ public class PvaultGettingStarted {
         return pvaultClient;
     }
 
-    private static Property buildModelProperty(
+    private static Property buildProperty(
             String name, String piiTypeName, String description,
             boolean isUnique, boolean isNullable, boolean isEncrypted, boolean isIndex) {
 

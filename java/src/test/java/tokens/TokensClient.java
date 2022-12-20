@@ -41,13 +41,13 @@ public class TokensClient {
                 tokens.objectIds(), tokens.tags(), tokens.tokenIds(), NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
-    public List<TokenMetadata> searchTokens(String collectionName, QueryToken modelsQueryToken) throws ApiException {
-        return collections.searchTokens(collectionName, APP_FUNCTIONALITY_REASON, modelsQueryToken,
+    public List<TokenMetadata> searchTokens(String collectionName, QueryToken queryToken) throws ApiException {
+        return collections.searchTokens(collectionName, APP_FUNCTIONALITY_REASON, queryToken,
                 NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
-    public void updateTokens(String collectionName, TokenDefinition tokens, UpdateTokenRequest modelsUpdateTokenRequest) throws ApiException {
-        collections.updateTokens(collectionName, APP_FUNCTIONALITY_REASON, modelsUpdateTokenRequest, USE_DEFAULT_TTL,
+    public void updateTokens(String collectionName, TokenDefinition tokens, UpdateTokenRequest updateTokenRequest) throws ApiException {
+        collections.updateTokens(collectionName, APP_FUNCTIONALITY_REASON, updateTokenRequest, USE_DEFAULT_TTL,
                 tokens.objectIds(), tokens.tags(), tokens.tokenIds(), NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
     }
 

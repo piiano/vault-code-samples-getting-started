@@ -2,7 +2,7 @@ package tokens;
 
 import org.openapitools.client.model.DetokenizedToken;
 
-import java.util.*;
+import java.util.List;
 
 record DetokenizeResult(List<DetokenizedToken> detokenizedTokens) {
 

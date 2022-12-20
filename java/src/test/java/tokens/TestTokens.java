@@ -1,6 +1,7 @@
 package tokens;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.collect.ImmutableList;
 import common.*;
 import objects.ObjectsClient;
 import org.junit.jupiter.api.AfterEach;
@@ -28,8 +29,8 @@ public class TestTokens {
     private final TokensClient tokensClient = new TokensClient(apiClient);
     private final CollectionSetup setup = new CollectionSetup();
 
-    private final List<String> props = List.of("_id", "ssn", "email");
-    private final List<String> tags = List.of("token_tag_1");
+    private final List<String> props = ImmutableList.of("_id", "ssn", "email");
+    private final List<String> tags = ImmutableList.of("token_tag_1");
 
     @BeforeEach()
     public void beforeEach() throws ApiException {
@@ -175,8 +176,8 @@ public class TestTokens {
     }
 
     private TokenizeRequest createTokenizeRequest(
-        TokenizeRequest.TypeEnum typeEnum,
-        List<UUID> ids, List<String> props, List<String> tags) {
+        TokenizeRequest.TypeEnum typeEnum, List<UUID> ids, List<String> props, List<String> tags) {
+
         TokenizeRequest request = new TokenizeRequest();
         request.setTags(tags);
         request.setType(typeEnum);

@@ -1,6 +1,5 @@
 package tokens;
 
-
 import org.openapitools.client.model.TokenValue;
 
 import java.util.*;
@@ -8,7 +7,7 @@ import java.util.*;
 // TokenizeResult contains all the information returned by the tokenize API method.
 // - The token values.
 // - Maps of token  to object ids and vice versa based on the guarantee
-//   made by tokenize that the List<ModelsTokenValue> that it returns is ordered
+//   made by tokenize that the List<TokenValue> that it returns is ordered
 //   by the objectIds that it is passed.
 class TokenizeResult {
     private final List<TokenValue> tokenValues;
