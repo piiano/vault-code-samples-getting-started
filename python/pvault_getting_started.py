@@ -90,13 +90,13 @@ def main():
         collection=customers_collection.name, 
         reason=APP_FUNCTIONALITY_REASON, 
         query=models.Query(match=models.QueryMap(email="john@somemail.com")),
-        props=["_id"],
+        props=["id"],
     )
 
     print(response.results)
 
     customer1_id_from_search = response.results[0]
-    assert customer1_id['id'] == customer1_id_from_search['_id'], (customer1_id, customer1_id_from_search)
+    assert customer1_id['id'] == customer1_id_from_search['id'], (customer1_id, customer1_id_from_search)
 
     print('\n\n== Step 5: Tokenize data ==\n\n')
 
@@ -132,7 +132,7 @@ def main():
     assert all_customers.paging.size + all_customers.paging.remaining_count == 3
     assert len(all_customers.results) > 0
     customer = all_customers.results[0]
-    orig_customer = id_to_customer[customer._id]
+    orig_customer = id_to_customer[customer.id]
     assert customer.email == orig_customer.email
 
     # Now getting only the SSN
