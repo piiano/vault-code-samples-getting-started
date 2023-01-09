@@ -71,7 +71,7 @@ public class TestTokens {
         batchTokenize(tokenType);
 
         var firstObjectId = setup.getObjectIds().get(0);
-        objectsClient.deleteById(setup.getCollection().getName(), List.of(firstObjectId));
+        objectsClient.deleteById(setup.getCollection().getName(), firstObjectId);
 
         assertIncorrectBehavior(detokenizeArchived);
     }

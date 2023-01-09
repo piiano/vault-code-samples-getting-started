@@ -239,7 +239,7 @@ public class PvaultGettingStarted {
 
     private static void deleteObject(ObjectsApi objectsApi, UUID id) throws ApiException {
 
-        objectsApi.deleteObjectById(COLLECTION_NAME, ImmutableList.of(id), APP_FUNCTIONALITY_REASON,
+        objectsApi.deleteObjectById(COLLECTION_NAME, id, APP_FUNCTIONALITY_REASON,
                 NO_OPTIONS, NO_ADHOC_REASON, false);
     }
 
