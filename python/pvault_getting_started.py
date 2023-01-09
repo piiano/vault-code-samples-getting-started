@@ -73,9 +73,9 @@ def main():
 
     print('\n\n== Step 4: Add data ==\n\n')
 
-    customer1 = models.Object(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123", zip_code_us="12345")
-    customer2 = models.Object(ssn="123-12-1235", email="mary@somemail.com", phone_number="+1-121212124", zip_code_us="12345")
-    customer3 = models.Object(ssn="123-12-1236", email="eric@somemail.com", phone_number="+1-121212125", zip_code_us="12345")
+    customer1 = models.ObjectFields(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123", zip_code_us="12345")
+    customer2 = models.ObjectFields(ssn="123-12-1235", email="mary@somemail.com", phone_number="+1-121212124", zip_code_us="12345")
+    customer3 = models.ObjectFields(ssn="123-12-1236", email="eric@somemail.com", phone_number="+1-121212125", zip_code_us="12345")
 
     customer1_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object=customer1)
     print(customer1_id)
@@ -102,8 +102,7 @@ def main():
 
     token_request = models.TokenizeRequest(
         object_ids=[customer1_id.id],
-        props=[email_property.name], type="POINTER",
-        reversible=True)
+        props=[email_property.name], type="POINTER")
     token_id = tokens_manager.tokenize(customers_collection.name,
                                        APP_FUNCTIONALITY_REASON,
                                        token_request)[0]
@@ -186,7 +185,7 @@ def main():
     # Deleting the customer
 
     objects_manager.delete_object_by_id(
-        customers_collection.name, ids=[customer1_id.id], reason=APP_FUNCTIONALITY_REASON)
+        customers_collection.name, id=customer1_id.id, reason=APP_FUNCTIONALITY_REASON)
     
     try:
         customer1_from_get = objects_manager.list_objects(
