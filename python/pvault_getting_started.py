@@ -73,15 +73,15 @@ def main():
 
     print('\n\n== Step 4: Add data ==\n\n')
 
-    customer1 = models.Object(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123", zip_code_us="12345")
-    customer2 = models.Object(ssn="123-12-1235", email="mary@somemail.com", phone_number="+1-121212124", zip_code_us="12345")
-    customer3 = models.Object(ssn="123-12-1236", email="eric@somemail.com", phone_number="+1-121212125", zip_code_us="12345")
+    customer1 = models.ObjectFields(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123", zip_code_us="12345")
+    customer2 = models.ObjectFields(ssn="123-12-1235", email="mary@somemail.com", phone_number="+1-121212124", zip_code_us="12345")
+    customer3 = models.ObjectFields(ssn="123-12-1236", email="eric@somemail.com", phone_number="+1-121212125", zip_code_us="12345")
 
-    customer1_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object=customer1)
+    customer1_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object_fields=customer1)
     print(customer1_id)
-    customer2_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object=customer2)
+    customer2_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object_fields=customer2)
     print(customer2_id)
-    customer3_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object=customer3)
+    customer3_id = objects_manager.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object_fields=customer3)
     print(customer3_id)
 
     id_to_customer = {customer1_id.id: customer1, customer2_id.id: customer2, customer3_id.id: customer3}
@@ -89,21 +89,20 @@ def main():
     response = objects_manager.search_objects(
         collection=customers_collection.name, 
         reason=APP_FUNCTIONALITY_REASON, 
-        query=models.Query(match=models.QueryMap(email="john@somemail.com")),
-        props=["_id"],
+        query=models.Query(match=models.MatchMap(email="john@somemail.com")),
+        props=["id"],
     )
 
     print(response.results)
 
     customer1_id_from_search = response.results[0]
-    assert customer1_id['id'] == customer1_id_from_search['_id'], (customer1_id, customer1_id_from_search)
+    assert customer1_id['id'] == customer1_id_from_search['id'], (customer1_id, customer1_id_from_search)
 
     print('\n\n== Step 5: Tokenize data ==\n\n')
 
     token_request = models.TokenizeRequest(
         object_ids=[customer1_id.id],
-        props=[email_property.name], type="POINTER",
-        reversible=True)
+        props=[email_property.name], type=models.TokenType("pointer"))
     token_id = tokens_manager.tokenize(customers_collection.name,
                                        APP_FUNCTIONALITY_REASON,
                                        token_request)[0]
@@ -132,7 +131,7 @@ def main():
     assert all_customers.paging.size + all_customers.paging.remaining_count == 3
     assert len(all_customers.results) > 0
     customer = all_customers.results[0]
-    orig_customer = id_to_customer[customer._id]
+    orig_customer = id_to_customer[customer.id]
     assert customer.email == orig_customer.email
 
     # Now getting only the SSN
@@ -186,7 +185,7 @@ def main():
     # Deleting the customer
 
     objects_manager.delete_object_by_id(
-        customers_collection.name, ids=[customer1_id.id], reason=APP_FUNCTIONALITY_REASON)
+        customers_collection.name, id=customer1_id.id, reason=APP_FUNCTIONALITY_REASON)
     
     try:
         customer1_from_get = objects_manager.list_objects(

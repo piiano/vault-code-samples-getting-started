@@ -36,8 +36,8 @@ public class ObjectsClient {
                 RELOAD_CACHE, null, null, "", ids, options, props);
     }
 
-    public void deleteById(String collectionName, List<UUID> ids) throws ApiException {
-        objects.deleteObjectById(collectionName, ids, APP_FUNCTIONALITY_REASON,
+    public void deleteById(String collectionName, UUID id) throws ApiException {
+        objects.deleteObjectById(collectionName, id, APP_FUNCTIONALITY_REASON,
                 Client.NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
     }
 }
