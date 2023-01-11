@@ -3,10 +3,8 @@ import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
 import org.openapitools.client.api.*;
+import org.openapitools.client.model.*;
 import org.openapitools.client.model.Collection;
-import org.openapitools.client.model.ObjectFieldsPage;
-import org.openapitools.client.model.Property;
-import org.openapitools.client.model.TokenizeRequest;
 
 import javax.management.RuntimeErrorException;
 import java.util.*;
@@ -169,7 +167,7 @@ public class PvaultGettingStarted {
         TokenizeRequest tokenizeRequest = new TokenizeRequest();
         tokenizeRequest.addObjectIdsItem(id);
         tokenizeRequest.addPropsItem("email");
-        tokenizeRequest.setType(TokenizeRequest.TypeEnum.POINTER);
+        tokenizeRequest.setType(TokenType.POINTER);
         tokenizeRequest.setTags(ImmutableList.of("token_tag"));
 
         String token = tokensApi.tokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, tokenizeRequest,
