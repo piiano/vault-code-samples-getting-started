@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class TestTokens {
@@ -29,7 +30,7 @@ public class TestTokens {
     private final TokensClient tokensClient = new TokensClient(apiClient);
     private final CollectionSetup setup = new CollectionSetup();
 
-    private final List<String> props = ImmutableList.of("_id", "ssn", "email");
+    private final List<String> props = ImmutableList.of("id", "ssn", "email");
     private final List<String> tags = ImmutableList.of("token_tag_1");
 
     @BeforeEach()
@@ -43,8 +44,8 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenizeRequest.TypeEnum.class)
-    public void batchTokenizeAndBatchDetokenize(TokenizeRequest.TypeEnum tokenType) throws ApiException {
+    @EnumSource(TokenType.class)
+    public void batchTokenizeAndBatchDetokenize(TokenType tokenType) throws ApiException {
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizedResult = batchDetokenize();
 
@@ -53,8 +54,8 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenizeRequest.TypeEnum.class)
-    public void batchTokenizeAndSingleDetokenize(TokenizeRequest.TypeEnum tokenType) throws ApiException {
+    @EnumSource(TokenType.class)
+    public void batchTokenizeAndSingleDetokenize(TokenType tokenType) throws ApiException {
 
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizeResult = singleDetokenize(tokenizeResult);
@@ -66,7 +67,7 @@ public class TestTokens {
     @ParameterizedTest
     @MethodSource("tokenizationTypeAndArchived")
     public void cannotDetokenizeArchivedObjects(
-        TokenizeRequest.TypeEnum tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
+        TokenType tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
 
         batchTokenize(tokenType);
 
@@ -79,7 +80,7 @@ public class TestTokens {
     @ParameterizedTest
     @MethodSource("tokenizationTypeAndArchived")
     public void cannotDetokenizeArchivedTokens(
-        TokenizeRequest.TypeEnum tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
+        TokenType tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
 
         // Batch tokenize
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
@@ -95,8 +96,8 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenizeRequest.TypeEnum.class)
-    public void successfullyDetokenizeWithRotatedTokens(TokenizeRequest.TypeEnum tokenType) throws ApiException, JsonProcessingException {
+    @EnumSource(TokenType.class)
+    public void successfullyDetokenizeWithRotatedTokens(TokenType tokenType) throws ApiException, JsonProcessingException {
 
         // Tokenize
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
@@ -126,8 +127,8 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenizeRequest.TypeEnum.class)
-    public void successfullyUpdateTokens(TokenizeRequest.TypeEnum tokenType) throws ApiException {
+    @EnumSource(TokenType.class)
+    public void successfullyUpdateTokens(TokenType tokenType) throws ApiException {
 
         // Tokenize
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
@@ -159,31 +160,32 @@ public class TestTokens {
 
     private static Stream<Arguments> tokenizationTypeAndArchived() {
         return Stream.of(
-            arguments(TokenizeRequest.TypeEnum.POINTER, true),
-            arguments(TokenizeRequest.TypeEnum.POINTER, false),
-            arguments(TokenizeRequest.TypeEnum.VALUE, true),
-            arguments(TokenizeRequest.TypeEnum.VALUE, false)
+                arguments(TokenType.POINTER, true),
+                arguments(TokenType.POINTER, false),
+                arguments(TokenType.RANDOMIZED, true),
+                arguments(TokenType.RANDOMIZED, false)
         );
     }
 
     // Batch tokenize the 'props' of the 'objectIds' adding the 'tags' to each token.
-    private TokenizeResult batchTokenize(TokenizeRequest.TypeEnum tokenType) throws ApiException {
+    private TokenizeResult batchTokenize(TokenType tokenType) throws ApiException {
+        List<TokenizeRequest> tokenizeRequests = setup.getObjectIds().stream()
+                .map(id -> createTokenizeRequest(tokenType, id, props, tags))
+                .collect(toList());
+
         return new TokenizeResult(
-            setup.getObjectIds(),
-            tokensClient.tokenize(
-                setup.getCollection().getName(),
-                createTokenizeRequest(tokenType, setup.getObjectIds(), props, tags)));
+                setup.getObjectIds(),
+                tokensClient.tokenize(setup.getCollection().getName(), tokenizeRequests)
+        );
     }
 
     private TokenizeRequest createTokenizeRequest(
-        TokenizeRequest.TypeEnum typeEnum, List<UUID> ids, List<String> props, List<String> tags) {
+        TokenType typeEnum, UUID id, List<String> props, List<String> tags) {
 
         TokenizeRequest request = new TokenizeRequest();
         request.setTags(tags);
         request.setType(typeEnum);
-        request.setReuseTokenId(false);
-        request.setReversible(true);
-        request.setObjectIds(ids);
+        request.setObjectId(id);
         request.setProps(props);
         return request;
     }

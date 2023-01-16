@@ -91,8 +91,8 @@ def add_objects_to_collection(objects_manager, customers_collection, customers):
 
 def tokenize_customer(tokens_manager, customers_collection, customer, prop, token_request, search_token_request):
     token = tokens_manager.tokenize(customers_collection.name,
-                                       APP_FUNCTIONALITY_REASON,
-                                       token_request)[0]
+                                    APP_FUNCTIONALITY_REASON,
+                                    [token_request])[0]
     print(f"Tokenize customer1 email result: \n{token}\n")
 
     token_ids = tokens_manager.search_tokens(customers_collection.name, APP_FUNCTIONALITY_REASON, search_token_request)
@@ -228,7 +228,7 @@ def main():
     print('\n\n== Step 5: Tokenize data ==\n\n')
 
     token_request = models.TokenizeRequest(
-        object_ids=[customer1_id],
+        object_id=customer1_id,
         props=[email_property.name],
         type=models.TokenType("pointer"))
 
