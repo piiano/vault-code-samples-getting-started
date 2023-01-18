@@ -165,7 +165,9 @@ public class PvaultGettingStarted {
     private static String tokenizeData(UUID id, TokensApi tokensApi) throws ApiException {
 
         TokenizeRequest tokenizeRequest = new TokenizeRequest();
-        tokenizeRequest.setObjectId(id);
+        InputObject object_id = new InputObject();
+        object_id.setId(id);
+        tokenizeRequest.setObject(object_id);
         tokenizeRequest.addPropsItem("email");
         tokenizeRequest.setType(TokenType.POINTER);
         tokenizeRequest.setTags(ImmutableList.of("token_tag"));

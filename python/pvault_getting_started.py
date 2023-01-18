@@ -228,7 +228,7 @@ def main():
     print('\n\n== Step 5: Tokenize data ==\n\n')
 
     token_request = models.TokenizeRequest(
-        object_id=customer1_id,
+        object=models.InputObject(id=customer1_id),
         props=[email_property.name],
         type=models.TokenType("pointer"))
 
