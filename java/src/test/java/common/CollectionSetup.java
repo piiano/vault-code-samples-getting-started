@@ -68,7 +68,7 @@ public class CollectionSetup {
         // get all properties (props == null)
         var objects = objectsClient.get(collectionName, objectIds, null).getResults();
         for (var object : objects) {
-            var objectId = UUID.fromString(object.get("_id").toString());
+            var objectId = UUID.fromString(object.get("id").toString());
             var fields = mapObjectIdToObjectFields.get(objectId);
             // verify all properties (props == null)
             Helpers.assertValuesOfKeysEqual(object, fields, null);
@@ -80,7 +80,7 @@ public class CollectionSetup {
         var objects = Factory.createObjects();
         for (var obj : objects) {
             var id = objectsClient.add(collectionName, obj).getId();
-            obj.put("_id", id.toString());
+            obj.put("id", id.toString());
             result.put(id, obj);
         }
         return result;

@@ -3,11 +3,10 @@ import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
 import org.openapitools.client.api.*;
+import org.openapitools.client.model.*;
 import org.openapitools.client.model.Collection;
-import org.openapitools.client.model.ObjectFieldsPage;
-import org.openapitools.client.model.Property;
-import org.openapitools.client.model.TokenizeRequest;
 
+import javax.management.RuntimeErrorException;
 import java.util.*;
 
 import static java.util.Collections.emptyList;
@@ -33,7 +32,9 @@ public class PvaultGettingStarted {
 
         print("\n\n== Step 3: Create a collection ==\n\n");
         CollectionsApi collectionsApi = new CollectionsApi(pvaultClient);
-        verifyNoCollections(collectionsApi);
+        CollectionPropertiesApi collectionpropapi = new CollectionPropertiesApi(pvaultClient);
+        // deleteCollection(collectionsApi);
+        verifyNoCollections(collectionpropapi);
         createCollection(collectionsApi);
 
         print("\n\n== Step 4: Add data ==\n\n");
@@ -79,14 +80,14 @@ public class PvaultGettingStarted {
     }
 
     // for safety reasons refuse to run if the collection already exists
-    private static void verifyNoCollections(CollectionsApi collectionsApi) throws ApiException {
+    private static void verifyNoCollections(CollectionPropertiesApi collectionpropApi) throws ApiException {
         print("Verifying the test collection is not present");
         try {
-            // deleteCollection(collectionsApi);
-            collectionsApi.getCollection(COLLECTION_NAME, JSON, emptyList());
-            print("Collection " + COLLECTION_NAME + " already exists.");
-            print("Recreate the Vault from scratch or uncomment deleteCollection() in this code. Bailing out.\n");
-            assert false;
+            List<Property> mp =
+                    collectionpropApi.listCollectionProperties(COLLECTION_NAME,new ArrayList<>());
+            throw new RuntimeException("Collection " + COLLECTION_NAME + " already exists.\n" +
+                  "Recreate the Vault from scratch or uncomment deleteCollection()" +
+                  " in this code. Bailing out.\n");
         } catch (ApiException e) {
             if (e.getCode() == 404) {
                 print("Collection "  + COLLECTION_NAME + " not found. Will create it");
@@ -98,7 +99,7 @@ public class PvaultGettingStarted {
     }
 
     private static void createCollection(CollectionsApi collectionApi) throws ApiException {
-        // Note: Adding a collection with 'PVSCHEMA' is not supported in the SDK
+        // Note: Adding a collection with pvschema is not supported in the SDK
         // Throughout this code we will use JSON exclusively.
 
         Collection collection = new Collection();
@@ -164,12 +165,14 @@ public class PvaultGettingStarted {
     private static String tokenizeData(UUID id, TokensApi tokensApi) throws ApiException {
 
         TokenizeRequest tokenizeRequest = new TokenizeRequest();
-        tokenizeRequest.addObjectIdsItem(id);
+        InputObject object_id = new InputObject();
+        object_id.setId(id);
+        tokenizeRequest.setObject(object_id);
         tokenizeRequest.addPropsItem("email");
-        tokenizeRequest.setType(TokenizeRequest.TypeEnum.POINTER);
+        tokenizeRequest.setType(TokenType.POINTER);
         tokenizeRequest.setTags(ImmutableList.of("token_tag"));
 
-        String token = tokensApi.tokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, tokenizeRequest,
+        String token = tokensApi.tokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, ImmutableList.of(tokenizeRequest),
                 USE_DEFAULT_TTL, NO_ADHOC_REASON, false).get(0).getTokenId();
         print("Token: ", token);
         return token;
@@ -188,6 +191,7 @@ public class PvaultGettingStarted {
         ObjectFieldsPage objectIdsPage =
                 objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, NO_ADHOC_REASON,
                         false, 1, "", "", emptyList(), ImmutableList.of(UNSAFE_OPTION), null);
+
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
 
@@ -201,7 +205,7 @@ public class PvaultGettingStarted {
     private static void queryPropertiesOfObjectsById(ObjectsApi objectsApi, UUID id) throws ApiException {
 
         ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
-                NO_ADHOC_REASON, false, null, "","", ImmutableList.of(id),
+                NO_ADHOC_REASON, false, null, "", "", ImmutableList.of(id),
                 emptyList(), ImmutableList.of("ssn"));
 
         assert objectIdsPage.getResults().size() == 1;
@@ -235,7 +239,7 @@ public class PvaultGettingStarted {
 
     private static void deleteObject(ObjectsApi objectsApi, UUID id) throws ApiException {
 
-        objectsApi.deleteObjectById(COLLECTION_NAME, ImmutableList.of(id), APP_FUNCTIONALITY_REASON,
+        objectsApi.deleteObjectById(COLLECTION_NAME, id, APP_FUNCTIONALITY_REASON,
                 NO_OPTIONS, NO_ADHOC_REASON, false);
     }
 

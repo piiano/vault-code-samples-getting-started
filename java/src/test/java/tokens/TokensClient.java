@@ -4,6 +4,7 @@ import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.TokensApi;
 import org.openapitools.client.model.*;
+import com.google.common.collect.ImmutableList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class TokensClient {
         collections = new TokensApi(client);
     }
 
-    public List<TokenValue> tokenize(String collectionName, TokenizeRequest tokenizeRequest) throws ApiException {
+    public List<TokenValue> tokenize(String collectionName, List<TokenizeRequest> tokenizeRequest) throws ApiException {
         return collections.tokenize(collectionName, APP_FUNCTIONALITY_REASON,
                 tokenizeRequest, USE_DEFAULT_TTL, NO_ADHOC_REASON, RELOAD_CACHE);
     }
