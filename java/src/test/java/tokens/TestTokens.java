@@ -163,7 +163,13 @@ public class TestTokens {
                 arguments(TokenType.POINTER, true),
                 arguments(TokenType.POINTER, false),
                 arguments(TokenType.RANDOMIZED, true),
-                arguments(TokenType.RANDOMIZED, false)
+                arguments(TokenType.RANDOMIZED, false),
+                arguments(TokenType.PCI, true),
+                arguments(TokenType.PCI, false),
+                arguments(TokenType.PCI_ONEWAY, true),
+                arguments(TokenType.PCI_ONEWAY, false),
+                arguments(TokenType.DETERMINISTIC, true),
+                arguments(TokenType.DETERMINISTIC, false)
         );
     }
 
