@@ -1,6 +1,6 @@
-from openapi_client.api import collections_api
-from openapi_client.api import objects_api
-from openapi_client.api import tokens_api
+from openapi_client.api import collections_api as collections_API
+from openapi_client.api import objects_api as objects_API
+from openapi_client.api import tokens_api as tokens_API
 from openapi_client import api_client
 from openapi_client import configuration
 from openapi_client import models
@@ -15,16 +15,70 @@ PVAULT_PORT = 8123
 PVAULT_ADDRESS = f'http://localhost:{PVAULT_PORT}'
 
 
-def check_db_is_clear(client):
-    # Verify the DB is empty. For safety reasons, don't work on non empty DB
-    collections_manager = collections_api.CollectionsApi(client)
+def main():
+    print('\n\n== Step 1: Create Api clients ==\n\n')
+    collections_api, objects_api, tokens_api, client = create_api_clients()
 
-    all_collections = list(collections_manager.list_collections())
+    try:
+        check_db_is_clear(client)
+    except Exception as e:
+        print(e)
+        # openapi client doesn't expose which exception was thrown so revert to this heuristic for clarity
+        if "Connection refused" in str(e):
+            print("Unable to connect to the Vault ({}). Is it up?".format(PVAULT_ADDRESS))
+        return
+
+    print('\n\n== Step 2: Create a collection ==\n\n')
+
+    ssn_property = models.ModelProperty(name="ssn", pii_type_name="SSN", is_unique=True, description="Social security number")
+    email_property = models.ModelProperty(name="email", pii_type_name="EMAIL")
+    phone_number_property = models.ModelProperty(name="phone_number", pii_type_name="PHONE_NUMBER", is_nullable=True)
+    zip_code_property = models.ModelProperty(name="zip_code_us", pii_type_name="ZIP_CODE_US", is_nullable=True)
+
+    customers_collection = add_customers_collection(collections_api, [ssn_property, email_property, phone_number_property, zip_code_property])
+
+    print('\n\n== Step 3: Add data ==\n\n')
+
+    customer1 = models.ObjectFields(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123", zip_code_us="12345")
+    customer2 = models.ObjectFields(ssn="123-12-1235", email="mary@somemail.com", phone_number="+1-121212124", zip_code_us="12345")
+    customer3 = models.ObjectFields(ssn="123-12-1236", email="eric@somemail.com", phone_number="+1-121212125", zip_code_us="12345")
+
+    customers = add_objects_to_collection(objects_api, customers_collection, [customer1, customer2, customer3])
+    customer1_id = list(customers)[0]
+
+    print('\n\n== Step 4: Tokenize data ==\n\n')
+
+    token_request = models.TokenizeRequest(
+        object=models.InputObject(id=customer1_id),
+        props=[email_property.name],
+        type=models.TokenType("pointer"))
+
+    search_token_request = models.QueryToken(object_ids=[customer1_id])
+
+    token_id = tokenize_customer(tokens_api, customers_collection, customer1, email_property,
+                                 token_request, search_token_request)
+
+    print('\n\n== Step 5: Query your data ==\n\n')
+
+    query_customers(objects_api, customers_collection, customer1, customer1_id, ssn_property.name)
+
+    print('\n\n== Step 6: Delete data ==\n\n')
+    # Deleting the token
+    delete_customers(tokens_api, objects_api, customers_collection, token_id, customer1_id, search_token_request)
+
+    print('Done!\n')
+
+
+def check_db_is_clear(client):
+    # Verify the DB is empty. For safety reasons, don't work on non-empty DB
+    collections_api = collections_API.CollectionsApi(client)
+
+    all_collections = list(collections_api.list_collections())
     assert len(all_collections) == 0, \
         "Bailing out due to existence of collections from previous runs. Please clear or recreate the Vault from scratch."
 
 
-def create_api_client():
+def create_api_clients():
     # Create configuration, bearer auth and client API
     config = configuration.Configuration(host=PVAULT_ADDRESS)
     config.api_key = {AUTHORIZATION_HEADER: PVAULT_AUTHENTICATION}
@@ -32,17 +86,13 @@ def create_api_client():
     client = api_client.ApiClient(config, AUTHORIZATION_HEADER,
                                   config.get_api_key_with_prefix(AUTHORIZATION_HEADER))
 
-    return client
-
-
-def create_api_managers(client):
     print("Create managers - each one responsible for different actions in the api")
 
-    collections_manager = collections_api.CollectionsApi(client)
-    objects_manager = objects_api.ObjectsApi(client)
-    tokens_manager = tokens_api.TokensApi(client)
+    collections_Api = collections_API.CollectionsApi(client)
+    objects_Api = objects_API.ObjectsApi(client)
+    tokens_Api = tokens_API.TokensApi(client)
 
-    return collections_manager, objects_manager, tokens_manager
+    return collections_Api, objects_Api, tokens_Api, client
 
 
 def add_customers_collection(collections_manager, props):
@@ -189,63 +239,6 @@ def delete_customers(tokens_manager, objects_manager, customers_collection, toke
         pass
     else:
         raise Exception("Object still exists!")
-
-
-def main():
-    print('\n\n== Step 1: Create Api client ==\n\n')
-    client = create_api_client()
-
-    print('\n\n== Step 2: Create Api managers ==\n\n')
-    collections_manager, objects_manager, tokens_manager = create_api_managers(client)
-
-    try:
-        check_db_is_clear(client)
-    except Exception as e:
-        print(e)
-        # openapi client doesn't expose which exception was thrown so revert to this heuristic for clarity
-        if "Connection refused" in str(e):
-            print("Unable to connect to the Vault ({}). Is it up?".format(PVAULT_ADDRESS))
-        return
-
-    print('\n\n== Step 3: Create a collection ==\n\n')
-
-    ssn_property = models.ModelProperty(name="ssn", pii_type_name="SSN", is_unique=True, description="Social security number")
-    email_property = models.ModelProperty(name="email", pii_type_name="EMAIL")
-    phone_number_property = models.ModelProperty(name="phone_number", pii_type_name="PHONE_NUMBER", is_nullable=True)
-    zip_code_property = models.ModelProperty(name="zip_code_us", pii_type_name="ZIP_CODE_US", is_nullable=True)
-
-    customers_collection = add_customers_collection(collections_manager, [ssn_property, email_property, phone_number_property, zip_code_property])
-
-    print('\n\n== Step 4: Add data ==\n\n')
-
-    customer1 = models.ObjectFields(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123", zip_code_us="12345")
-    customer2 = models.ObjectFields(ssn="123-12-1235", email="mary@somemail.com", phone_number="+1-121212124", zip_code_us="12345")
-    customer3 = models.ObjectFields(ssn="123-12-1236", email="eric@somemail.com", phone_number="+1-121212125", zip_code_us="12345")
-
-    customers = add_objects_to_collection(objects_manager, customers_collection, [customer1, customer2, customer3])
-    customer1_id = list(customers)[0]
-
-    print('\n\n== Step 5: Tokenize data ==\n\n')
-
-    token_request = models.TokenizeRequest(
-        object=models.InputObject(id=customer1_id),
-        props=[email_property.name],
-        type=models.TokenType("pointer"))
-
-    search_token_request = models.QueryToken(object_ids=[customer1_id])
-
-    token_id = tokenize_customer(tokens_manager, customers_collection, customer1, email_property,
-                                 token_request, search_token_request)
-
-    print('\n\n== Step 6: Query your data ==\n\n')
-
-    query_customers(objects_manager, customers_collection, customer1, customer1_id, ssn_property.name)
-
-    print('\n\n== Step 7: Delete data ==\n\n')
-    # Deleting the token
-    delete_customers(tokens_manager, objects_manager, customers_collection, token_id, customer1_id, search_token_request)
-
-    print('Done!\n')
 
 
 if __name__ == '__main__':
