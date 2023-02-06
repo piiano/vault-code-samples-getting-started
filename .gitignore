@@ -7,6 +7,9 @@ vault_python_sdk
 # Generated Java sdk
 vault_java_sdk
 
+# Generated Typescript sdk
+vault_typescript_sdk
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
