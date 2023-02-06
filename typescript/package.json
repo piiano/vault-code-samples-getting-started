@@ -1,0 +1,19 @@
+{
+  "name": "piiano-getting-started-typescript",
+  "version": "0.0.1",
+  "description": "getting started with Piiano vault using typescript",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/pvault_getting_started.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "axios": "^1.3.2",
+    "form-data": "^4.0.0",
+    "tsc": "^2.0.4"
+  },
+  "dependencies": {
+    "typescript": "^4.9.5"
+  }
+}
