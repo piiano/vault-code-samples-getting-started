@@ -15,10 +15,6 @@
     "skipLibCheck": true,
     "outDir": "build",
     "rootDir": "./",
-    "paths": {
-      "Pvault/*": [
-        "./vault_typescript_sdk/*"
-      ]
-    },
+    "sourceMap": true
   }
 }
