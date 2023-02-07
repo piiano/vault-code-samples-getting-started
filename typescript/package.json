@@ -4,7 +4,7 @@
   "description": "getting started with Piiano vault using typescript",
   "scripts": {
     "build": "tsc",
-    "start": "node build/pvault_getting_started.js"
+    "start": "node build/src/PvaultGettingStarted.js"
   },
   "author": "",
   "license": "ISC",
