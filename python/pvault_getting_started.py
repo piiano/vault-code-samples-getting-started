@@ -164,28 +164,30 @@ def tokenize_customer(tokens_api_client, customers_collection, customer, prop, t
 
     return token
 
-
+# Note: this code is currently not called by the main function.
+# This code demonstrates tokenization by a caller supplied object fields.
 def tokenize_object_fields(tokens_api_client, customers_collection):
-    object_fields = models.ObjectFields(first_name="MyName", last_name="MyLastName", phone_number="+972-23-123-1234")
-    token_type = models.TokenType(value="randomized")
+    object_fields = models.ObjectFields(first_name="Yuval", last_name="A", phone_number="+972-23-123-1234")
     input_object = models.InputObject(fields=object_fields)
+    token_type_randomized = models.TokenType(value="randomized")
 
+    # Creating a list of tokenize request for a batch tokenize
     tokenize_requests_list = [
-        models.TokenizeRequest(object=input_object, props=["first_name"], type=token_type, tags=["a"]),
-        models.TokenizeRequest(object=input_object, props=["last_name"], type=token_type, tags=["a"]),
-        models.TokenizeRequest(object=input_object, props=["phone_number"], type=token_type, tags=["a"])
+        models.TokenizeRequest(object=input_object, props=["first_name"], type=token_type_randomized, tags=["demo_tag"]),
+        models.TokenizeRequest(object=input_object, props=["last_name"], type=token_type_randomized, tags=["demo_tag"]),
+        models.TokenizeRequest(object=input_object, props=["phone_number"], type=token_type_randomized, tags=["demo_tag"])
     ]
 
+    # Tokenizing by this 3 requests. Expecting to get 3 token ids, one for each request
     tokenize_result = tokens_api_client.tokenize(collection=customers_collection.name,
                                                  reason=APP_FUNCTIONALITY_REASON,
                                                  tokenize_request=tokenize_requests_list)
 
-    # taking tokenize results and extract the token ids to a list
+    # Taking tokenize results and extract the token ids into a list
     token_ids = [token["token_id"] for token in tokenize_result]
     detokenize_result = tokens_api_client.detokenize(collection=customers_collection.name,
                                                      reason=APP_FUNCTIONALITY_REASON,
                                                      token_ids=token_ids)
-
 
 def query_customers(objects_api_client, customers_collection, customer1, customer1_id, prop):
     all_customers = objects_api_client.list_objects(customers_collection.name, APP_FUNCTIONALITY_REASON, page_size=1,
