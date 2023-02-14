@@ -48,7 +48,6 @@ def main():
 
     print('\n\n== Step 4: Tokenize data ==\n\n')
 
-    print("Learn how to tokenize by object id\n")
     token_request = models.TokenizeRequest(
         object=models.InputObject(id=customer1_id),
         props=[email_property.name],
@@ -58,9 +57,6 @@ def main():
 
     token_id = tokenize_customer(tokens_api_client, customers_collection, customer1, email_property,
                                  token_request, search_token_request)
-
-    print("\nLean how to tokenize ObjectFields\n")
-    tokenize_object_fields(tokens_api_client, customers_collection)
 
     print('\n\n== Step 5: Query your data ==\n\n')
 
@@ -170,36 +166,25 @@ def tokenize_customer(tokens_api_client, customers_collection, customer, prop, t
 
 
 def tokenize_object_fields(tokens_api_client, customers_collection):
-    object_fields = models.ObjectFields(ssn="123-12-1234", email="john@somemail.com", phone_number="+1-121212123")
+    object_fields = models.ObjectFields(first_name="MyName", last_name="MyLastName", phone_number="+972-23-123-1234")
     token_type = models.TokenType(value="randomized")
     input_object = models.InputObject(fields=object_fields)
 
-    print("Let's say we want to tokenize three ObjectFields: ssn, email and phone_number\n"
-          "to a token of type randomized with the tag 'a', and we want to tokenize each property in separate.\n"
-          f"For this action we will create the ObjectFields:\n\n{object_fields}\n\n"
-          "And three tokenize requests, one for each property =>")
-
     tokenize_requests_list = [
-        models.TokenizeRequest(object=input_object, props=["ssn"], type=token_type, tags=["a"]),
-        models.TokenizeRequest(object=input_object, props=["email"], type=token_type, tags=["a"]),
+        models.TokenizeRequest(object=input_object, props=["first_name"], type=token_type, tags=["a"]),
+        models.TokenizeRequest(object=input_object, props=["last_name"], type=token_type, tags=["a"]),
         models.TokenizeRequest(object=input_object, props=["phone_number"], type=token_type, tags=["a"])
     ]
 
-    print(f"Tokenize requests list: \n{tokenize_requests_list}\n")
     tokenize_result = tokens_api_client.tokenize(collection=customers_collection.name,
                                                  reason=APP_FUNCTIONALITY_REASON,
                                                  tokenize_request=tokenize_requests_list)
-
-    print(f"Tokenize result of ObjectFields: \n{tokenize_result}\n")
 
     # taking tokenize results and extract the token ids to a list
     token_ids = [token["token_id"] for token in tokenize_result]
     detokenize_result = tokens_api_client.detokenize(collection=customers_collection.name,
                                                      reason=APP_FUNCTIONALITY_REASON,
                                                      token_ids=token_ids)
-
-    print("detokenize result")
-    print(detokenize_result)
 
 
 def query_customers(objects_api_client, customers_collection, customer1, customer1_id, prop):
