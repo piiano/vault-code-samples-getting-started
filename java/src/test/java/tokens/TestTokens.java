@@ -44,7 +44,7 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenType.class)
+    @MethodSource("tokenizationTypeAndArchived")
     public void batchTokenizeAndBatchDetokenize(TokenType tokenType) throws ApiException {
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizedResult = batchDetokenize();
@@ -54,7 +54,7 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenType.class)
+    @MethodSource("tokenizationTypeAndArchived")
     public void batchTokenizeAndSingleDetokenize(TokenType tokenType) throws ApiException {
 
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
@@ -96,7 +96,7 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenType.class)
+    @MethodSource("tokenizationTypeAndArchived")
     public void successfullyDetokenizeWithRotatedTokens(TokenType tokenType) throws ApiException, JsonProcessingException {
 
         // Tokenize
@@ -166,10 +166,12 @@ public class TestTokens {
                 arguments(TokenType.RANDOMIZED, false),
                 arguments(TokenType.PCI, true),
                 arguments(TokenType.PCI, false),
-                arguments(TokenType.PCI_ONEWAY, true),
-                arguments(TokenType.PCI_ONEWAY, false),
+                // arguments(TokenType.PCI_ONEWAY, true),
+                // arguments(TokenType.PCI_ONEWAY, false),
                 arguments(TokenType.DETERMINISTIC, true),
                 arguments(TokenType.DETERMINISTIC, false)
+
+                // Most of the tests are using detokenize / rotate tokens but this can't work on TokenType.PCI_ONEWAY
         );
     }
 

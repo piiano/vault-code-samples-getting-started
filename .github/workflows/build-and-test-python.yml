@@ -19,6 +19,9 @@ jobs:
      - name: Install python
        uses: actions/setup-python@v4
 
+     - name: Change permissions of python directory
+       run: chmod -R 777 python
+
      - name: Prepare.
        run: cd python && ./prepare.sh
 
