@@ -17,4 +17,5 @@ docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 gen
 chmod +rwx .
 
 echo "Installing SDK"
-# cd vault_python_sdk && pip install .
+cd vault_python_sdk
+pip install .
