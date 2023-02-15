@@ -2,8 +2,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-#python3 -m venv .venv --prompt vault_getting_started
-#source .venv/bin/activate
+python3 -m venv .venv --prompt vault_getting_started
+source .venv/bin/activate
 
 echo "Downloading openapi file"
 curl -o openapi.yaml https://piiano.com/docs/assets/openapi.yaml
