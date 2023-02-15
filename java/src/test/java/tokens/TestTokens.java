@@ -174,7 +174,7 @@ public class TestTokens {
                 arguments(TokenType.POINTER),
                 arguments(TokenType.RANDOMIZED),
                 arguments(TokenType.PCI),
-                arguments(TokenType.DETERMINISTIC),
+                arguments(TokenType.DETERMINISTIC)
         );
     }
 
