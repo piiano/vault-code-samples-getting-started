@@ -20,7 +20,9 @@ jobs:
        uses: actions/setup-python@v4
 
      - name: Prepare.
-       run: cd python && chmod +rwx . && ./prepare.sh
+       run: |
+         cd python
+         ./prepare.sh
 
      - name: Start Vault and run tests.
        run: |
@@ -32,4 +34,5 @@ jobs:
            -d \
            piiano/pvault-dev:latest
          sleep 10
-         cd python && ./run.sh
+         cd python
+         ./run.sh
