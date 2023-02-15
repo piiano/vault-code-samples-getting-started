@@ -15,5 +15,5 @@ docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 gen
     -o local/vault_python_sdk
 
 echo "Installing openapi-client"
-cd vault_python_sdk && pip install openapi-client requirements.txt test-requirements.txt
-sudo python setup.py install
+chmod +xrw .
+cd vault_python_sdk && pip install .
