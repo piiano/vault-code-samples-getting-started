@@ -44,24 +44,22 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenType.class)
+    @MethodSource("reversibleTokenTypes")
     public void batchTokenizeAndBatchDetokenize(TokenType tokenType) throws ApiException {
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizedResult = batchDetokenize();
 
-        // Enable this assertion in the release
-        // assertDetokenizeResultIsCorrect(tokenizeResult, detokenizedResult);
+        assertDetokenizeResultIsCorrect(tokenizeResult, detokenizedResult);
     }
 
     @ParameterizedTest
-    @EnumSource(TokenType.class)
+    @MethodSource("reversibleTokenTypes")
     public void batchTokenizeAndSingleDetokenize(TokenType tokenType) throws ApiException {
 
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizeResult = singleDetokenize(tokenizeResult);
 
-        // Enable this assertion in the release
-        // assertDetokenizeResultIsCorrect(tokenizeResult, detokenizeResult);
+        assertDetokenizeResultIsCorrect(tokenizeResult, detokenizeResult);
     }
 
     @ParameterizedTest
@@ -96,7 +94,7 @@ public class TestTokens {
     }
 
     @ParameterizedTest
-    @EnumSource(TokenType.class)
+    @MethodSource("reversibleTokenTypes")
     public void successfullyDetokenizeWithRotatedTokens(TokenType tokenType) throws ApiException, JsonProcessingException {
 
         // Tokenize
@@ -166,10 +164,17 @@ public class TestTokens {
                 arguments(TokenType.RANDOMIZED, false),
                 arguments(TokenType.PCI, true),
                 arguments(TokenType.PCI, false),
-                arguments(TokenType.PCI_ONEWAY, true),
-                arguments(TokenType.PCI_ONEWAY, false),
                 arguments(TokenType.DETERMINISTIC, true),
                 arguments(TokenType.DETERMINISTIC, false)
+        );
+    }
+
+    private static Stream<Arguments> reversibleTokenTypes() {
+        return Stream.of(
+                arguments(TokenType.POINTER),
+                arguments(TokenType.RANDOMIZED),
+                arguments(TokenType.PCI),
+                arguments(TokenType.DETERMINISTIC)
         );
     }
 

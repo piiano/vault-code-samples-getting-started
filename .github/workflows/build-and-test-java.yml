@@ -4,6 +4,7 @@ on:
     paths:
       - java/**
   workflow_dispatch:
+  workflow_call:
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
