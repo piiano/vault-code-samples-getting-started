@@ -2,8 +2,8 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-python3 -m venv .venv --prompt vault_getting_started
-source .venv/bin/activate
+#python3 -m venv .venv --prompt vault_getting_started
+#source .venv/bin/activate
 
 echo "Downloading openapi file"
 curl -o openapi.yaml https://piiano.com/docs/assets/openapi.yaml
@@ -14,6 +14,7 @@ docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 gen
     -g python \
     -o local/vault_python_sdk
 
-echo "Installing openapi-client"
-chmod +xrw .
-cd vault_python_sdk && pip install .
+chmod +rwx .
+
+echo "Installing SDK"
+# cd vault_python_sdk && pip install .

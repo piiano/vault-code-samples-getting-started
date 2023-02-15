@@ -20,7 +20,7 @@ jobs:
        uses: actions/setup-python@v4
 
      - name: Change permissions of python directory
-       run: chmod -R 777 .
+       run: chmod +rwx .
 
      - name: Prepare.
        run: cd python && ./prepare.sh
