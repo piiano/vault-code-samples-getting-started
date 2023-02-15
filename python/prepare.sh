@@ -9,13 +9,10 @@ echo "Downloading openapi file"
 curl -o openapi.yaml https://piiano.com/docs/assets/openapi.yaml
 
 echo "Running openapi tools to create the SDK"
-docker run --rm -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 generate \
+docker run --rm -u $(id -u):$(id -g) -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 generate \
     -i local/openapi.yaml \
     -g python \
     -o local/vault_python_sdk
 
-chmod +rwx .
-
 echo "Installing SDK"
-cd vault_python_sdk
-pip install .
+cd vault_python_sdk && pip install .
