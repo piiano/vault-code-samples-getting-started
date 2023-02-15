@@ -49,8 +49,7 @@ public class TestTokens {
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizedResult = batchDetokenize();
 
-        // Enable this assertion in the release
-        // assertDetokenizeResultIsCorrect(tokenizeResult, detokenizedResult);
+        assertDetokenizeResultIsCorrect(tokenizeResult, detokenizedResult);
     }
 
     @ParameterizedTest
@@ -60,8 +59,7 @@ public class TestTokens {
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
         DetokenizeResult detokenizeResult = singleDetokenize(tokenizeResult);
 
-        // Enable this assertion in the release
-        // assertDetokenizeResultIsCorrect(tokenizeResult, detokenizeResult);
+        assertDetokenizeResultIsCorrect(tokenizeResult, detokenizeResult);
     }
 
     @ParameterizedTest
@@ -173,7 +171,7 @@ public class TestTokens {
 
     private static Stream<Arguments> reversibleTokenTypes() {
         return Stream.of(
-                arguments(TokenType.POINTER),
+                arguments(TokenType.POINTER, true),
                 arguments(TokenType.POINTER),
                 arguments(TokenType.RANDOMIZED),
                 arguments(TokenType.RANDOMIZED),
@@ -181,8 +179,6 @@ public class TestTokens {
                 arguments(TokenType.PCI),
                 arguments(TokenType.DETERMINISTIC),
                 arguments(TokenType.DETERMINISTIC)
-
-                // Most of the tests are using detokenize / rotate tokens but this can't work on TokenType.PCI_ONEWAY
         );
     }
 
