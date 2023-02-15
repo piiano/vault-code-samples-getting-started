@@ -171,14 +171,10 @@ public class TestTokens {
 
     private static Stream<Arguments> reversibleTokenTypes() {
         return Stream.of(
-                arguments(TokenType.POINTER, true),
                 arguments(TokenType.POINTER),
                 arguments(TokenType.RANDOMIZED),
-                arguments(TokenType.RANDOMIZED),
-                arguments(TokenType.PCI),
                 arguments(TokenType.PCI),
                 arguments(TokenType.DETERMINISTIC),
-                arguments(TokenType.DETERMINISTIC)
         );
     }
 
