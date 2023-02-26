@@ -27,12 +27,21 @@ jobs:
 
      - name: Start Vault and run tests.
        run: |
-         docker run --rm \
+        shopt -s expand_aliases
+
+        docker run --rm \
            --name pvault-dev \
            -p 8123:8123 \
            -e PVAULT_DEVMODE=true \
            -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
            -d \
            piiano/pvault-dev:latest
-         sleep 10
-         cd python && ./run.sh
+        
+        alias pvault="docker run --rm -i --add-host='host.docker.internal:host-gateway' -v $(pwd):/pwd -w /pwd piiano/pvault-cli:latest"
+        until pvault status > /dev/null 2>&1
+        do echo "Waiting for the vault to start ..." && sleep 1; done
+
+        cd python && ./run.sh
+
+     - name: Stop Vault.
+       run: docker stop pvault-dev
