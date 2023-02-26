@@ -5,6 +5,9 @@ on:
       - java/**
   workflow_dispatch:
   workflow_call:
+    secrets:
+      PVAULT_SERVICE_LICENSE:
+        required: false
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
@@ -32,7 +35,7 @@ jobs:
       - name: Start Vault and run tests.
         run: |
           shopt -s expand_aliases
-
+          
           docker run --rm \
              --name pvault-dev \
              -p 8123:8123 \
