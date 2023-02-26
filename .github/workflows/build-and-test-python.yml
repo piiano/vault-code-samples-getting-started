@@ -36,3 +36,6 @@ jobs:
            piiano/pvault-dev:latest
          sleep 10
          cd python && ./run.sh
+
+     - name: Stop Vault.
+       run: docker stop pvault-dev

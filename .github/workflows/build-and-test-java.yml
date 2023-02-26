@@ -33,10 +33,13 @@ jobs:
         run: |
           docker run --rm \
             --name pvault-dev \
-            -p 8123:8123 \
+            -p 8124:8124 \
             -e PVAULT_DEVMODE=true \
             -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
             -d \
             piiano/pvault-dev:latest
           sleep 10
           cd java && ./test.sh ./run.sh
+
+      - name: Stop Vault.
+        run: docker stop pvault-dev
