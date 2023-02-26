@@ -33,7 +33,7 @@ jobs:
         run: |
           docker run --rm \
             --name pvault-dev-for-python \
-            -p 8124:8124 \
+            -p 8123:8123 \
             -e PVAULT_DEVMODE=true \
             -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
             -d \
