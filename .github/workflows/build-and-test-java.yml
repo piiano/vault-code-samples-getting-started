@@ -32,7 +32,7 @@ jobs:
       - name: Start Vault and run tests.
         run: |
           docker run --rm \
-            --name pvault-dev \
+            --name pvault-dev-for-python \
             -p 8124:8124 \
             -e PVAULT_DEVMODE=true \
             -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
@@ -42,4 +42,4 @@ jobs:
           cd java && ./test.sh ./run.sh
 
       - name: Stop Vault.
-        run: docker stop pvault-dev
+        run: docker stop pvault-dev-for-python
