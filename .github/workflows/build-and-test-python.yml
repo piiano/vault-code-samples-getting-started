@@ -5,6 +5,9 @@ on:
       - python/**
   workflow_dispatch:
   workflow_call:
+    secrets:
+      PVAULT_SERVICE_LICENSE:
+        required: false
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
@@ -28,7 +31,6 @@ jobs:
      - name: Start Vault and run tests.
        run: |
         shopt -s expand_aliases
-        echo "pvaul license: ${PVAULT_SERVICE_LICENSE}"
 
         docker run --rm \
            --name pvault-dev \
