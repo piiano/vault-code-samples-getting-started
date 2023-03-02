@@ -30,10 +30,10 @@ def main():
 
     print('\n\n== Step 2: Create a collection ==\n\n')
 
-    ssn_property = models.ModelProperty(name="ssn", pii_type_name="SSN", is_unique=True, description="Social security number")
-    email_property = models.ModelProperty(name="email", pii_type_name="EMAIL")
-    phone_number_property = models.ModelProperty(name="phone_number", pii_type_name="PHONE_NUMBER", is_nullable=True)
-    zip_code_property = models.ModelProperty(name="zip_code_us", pii_type_name="ZIP_CODE_US", is_nullable=True)
+    ssn_property = models.ModelProperty(name="ssn", data_type_name="SSN", is_unique=True, description="Social security number")
+    email_property = models.ModelProperty(name="email", data_type_name="EMAIL")
+    phone_number_property = models.ModelProperty(name="phone_number", data_type_name="PHONE_NUMBER", is_nullable=True)
+    zip_code_property = models.ModelProperty(name="zip_code_us", data_type_name="ZIP_CODE_US", is_nullable=True)
 
     customers_collection = add_customers_collection(collections_api_client, [ssn_property, email_property, phone_number_property, zip_code_property])
 

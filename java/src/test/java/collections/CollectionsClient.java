@@ -30,7 +30,7 @@ public class CollectionsClient {
 
         Property property = new Property();
         property.setName(name);
-        property.setPiiTypeName(piiTypeName);
+        property.setDataTypeName(piiTypeName);
         property.setDescription(description);
         property.setIsUnique(isUnique);
         property.isNullable(isNullable);
