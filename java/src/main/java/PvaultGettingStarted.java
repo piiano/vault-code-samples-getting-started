@@ -254,12 +254,12 @@ public class PvaultGettingStarted {
     }
 
     private static Property buildProperty(
-            String name, String piiTypeName, String description,
+            String name, String dataTypeName, String description,
             boolean isUnique, boolean isNullable, boolean isEncrypted, boolean isIndex) {
 
         Property property = new Property();
         property.setName(name);
-        property.setPiiTypeName(piiTypeName);
+        property.setDataTypeName(dataTypeName);
         property.setDescription(description);
         property.setIsUnique(isUnique);
         property.isNullable(isNullable);
