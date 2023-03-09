@@ -3,10 +3,9 @@ import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
 import org.openapitools.client.api.*;
-import org.openapitools.client.model.*;
 import org.openapitools.client.model.Collection;
+import org.openapitools.client.model.*;
 
-import javax.management.RuntimeErrorException;
 import java.util.*;
 
 import static java.util.Collections.emptyList;
@@ -181,7 +180,7 @@ public class PvaultGettingStarted {
     private static void detokenizeToken(TokensApi tokensApi, String token) throws ApiException {
 
         String returnedEmail = tokensApi.detokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, emptyList(),
-                        NO_OPTIONS, emptyList(), ImmutableList.of(token), NO_ADHOC_REASON, false)
+                        emptyList(), ImmutableList.of(token), emptyList(), NO_OPTIONS, NO_ADHOC_REASON, false)
                 .get(0).getFields().get("email").toString();
         assert "john@somemail.com".equals(returnedEmail);
     }
