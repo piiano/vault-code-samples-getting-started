@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import static common.Client.*;
+import static java.util.Collections.emptyList;
 
 public class TokensClient {
 
@@ -33,8 +34,8 @@ public class TokensClient {
         if (archived) {
             options.add("archived");
         }
-        return collections.detokenize(collectionName, APP_FUNCTIONALITY_REASON, tokens.objectIds(), options,
-                tokens.tags(), tokens.tokenIds(), NO_ADHOC_REASON, RELOAD_CACHE);
+        return collections.detokenize(collectionName, APP_FUNCTIONALITY_REASON, tokens.objectIds(),
+                tokens.tags(), tokens.tokenIds(), emptyList(), options, NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
     public void archiveTokens(String collectionName, TokenDefinition tokens) throws ApiException {
