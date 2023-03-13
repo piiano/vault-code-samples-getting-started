@@ -55,7 +55,7 @@ jobs:
           cache: maven
 
       - name: Prepare.
-        run: cd java && ./prepare.sh && ls -la
+        run: cd java && ./prepare.sh && \rm -rf ./vault_java_sdk
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
