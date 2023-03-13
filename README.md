@@ -35,16 +35,14 @@ For Java, we have included additional test examples of how to work with tokens.
 Run Piiano Vault. The simplest way is using the pvault-dev flavor as explained here: https://piiano.com/docs/guides/get-started#install-piiano-vault
 
 Assuming the Vault is running on localhost listening on port 8123 (the default):
-### For Python
+
+Enter the directory of the desired code sample language.
 ```
-cd python
-./prepare.sh
-./run.sh
-```
-### For Java
-```
-cd java
-./prepare.sh
-./run.sh
+cd python / java / typescript
 ```
 
+And run the following commands:
+```
+./prepare.sh
+./run.sh
+```

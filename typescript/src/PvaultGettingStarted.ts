@@ -1,18 +1,18 @@
 import {
-  ApiError,
   Collection,
-  CollectionsService,
-  ObjectFields,
-  ObjectsService,
-  OpenAPI,
+  CollectionsApi,
+  ModelObject,
+  ObjectsApi,
   QueryToken,
-  SystemService,
+  SystemApi,
   TokenizeRequest,
-  TokensService,
+  TokensApi,
   TokenType,
+  CollectionTypeEnum,
+  Configuration,
 } from "../vault_typescript_sdk";
 
-interface CustomersCollectionObject extends ObjectFields {
+interface CustomersCollectionObject extends ModelObject {
   ssn: string;
   email: string;
   phone_number?: string;
@@ -24,8 +24,7 @@ interface RemoteCustomersCollectionObject extends Partial<CustomersCollectionObj
 }
 
 class PvaultGettingStarted {
-  constructor(private host: string, private port: string, private apiToken: string) {}
-
+  constructor(private host: string, private port: string, private apiToken: string, private conf: any) {}
   public async run() {
     console.log("\n\n== Steps 1 + 2: Connect to Piiano vault and check status ==\n\n");
     this.setupApiClient();
@@ -35,26 +34,26 @@ class PvaultGettingStarted {
     console.log("\n\n== Step 3: Create a collection ==\n\n");
     const customersCollectionSchema: Collection = {
       name: "customers",
-      type: Collection.type.PERSONS,
+      type: CollectionTypeEnum.Persons,
       properties: [
         {
           name: "ssn",
-          pii_type_name: "SSN",
-          is_unique: true,
+          data_type_name: "SSN",
+          is_nullable: true,
           description: "Social Security Number",
         },
         {
           name: "email",
-          pii_type_name: "EMAIL",
+          data_type_name: "EMAIL",
         },
         {
           name: "phone_number",
-          pii_type_name: "PHONE_NUMBER",
+          data_type_name: "PHONE_NUMBER",
           is_nullable: true,
         },
         {
           name: "zip_code_us",
-          pii_type_name: "ZIP_CODE_US",
+          data_type_name: "ZIP_CODE_US",
           is_nullable: true,
         },
       ],
@@ -83,11 +82,11 @@ class PvaultGettingStarted {
       },
     ];
 
-    const customers = await this.addObjectsToCollection(customersCollection, objects);
+    const customers = await this.addObjectsToCollection(customersCollection.data, objects);
 
     console.log("\n\n== Step 5: Tokenize data ==\n\n");
     const tokenRequest: TokenizeRequest = {
-      type: TokenType.POINTER,
+      type: TokenType.Pointer,
       props: ["email"],
       object: {
         id: customers[0].id,
@@ -99,17 +98,17 @@ class PvaultGettingStarted {
     };
 
     const tokenId = await this.tokenizeObject(
-      customersCollection,
+      customersCollection.data,
       customers[0],
       tokenRequest,
       searchTokenRequest
     );
 
     console.log("\n\n== Step 6: Query your data ==\n\n");
-    await this.queryObjects(customersCollection, customers, customers[0], "ssn");
+    await this.queryObjects(customersCollection.data, customers, customers[0], "ssn");
 
     console.log("\n\n== Step 7: Delete data ==\n\n");
-    await this.deleteObject(customersCollection, tokenId, customers[0].id!, searchTokenRequest);
+    await this.deleteObject(customersCollection.data, tokenId, customers[0].id!, searchTokenRequest);
 
     console.log("\n\nDone!\n");
   }
@@ -118,8 +117,10 @@ class PvaultGettingStarted {
     console.log("Setting up API client connection...");
 
     // Set up API client
-    OpenAPI.BASE = `${this.host}:${this.port}`;
-    OpenAPI.TOKEN = this.apiToken;
+    this.conf = new Configuration({
+      basePath: `${this.host}:${this.port}`,
+      accessToken: this.apiToken
+    })
   }
 
   public async prepareVault() {
@@ -127,29 +128,32 @@ class PvaultGettingStarted {
     console.log("\tChecking vault is empty...");
 
     // Fetch all collections
-    const collections = await CollectionsService.listCollections();
-    if (collections.length > 0) throw new Error('Vault is not empty. Please run this script on a clean instance.');
+    const collection_client = new CollectionsApi(this.conf)
+    const system_client = new SystemApi(this.conf)
+
+    const collections = await collection_client.listCollections();
+    if (collections.data.length > 0) throw new Error('Vault is not empty. Please run this script on a clean instance.');
 
     console.log("\tChecking health of vault...");
 
     // Check vault health
-    const health = await SystemService.controlHealth();
+    const health = await system_client.controlHealth();
 
-    if (health.status !== "pass") throw new Error("Health check failed.");
+    if (health.data.status !== "pass") throw new Error("Health check failed.");
   }
 
   public async createCollection(schema: Collection, format: "json" | "pvschema" = "json") {
     console.log(`Adding collection ${schema.name}...`);
-
+    const collection_client = new CollectionsApi(this.conf)
     // Create collection
-    const collection = await CollectionsService.addCollection(schema, format);
+    const collection = await collection_client.addCollection(schema, format);
 
     // Fetch collection by name
-    const newCollection = await CollectionsService.getCollection(collection.name);
+    const newCollection = await collection_client.getCollection(collection.data.name);
 
     if (!newCollection) throw new Error("Collection not found.");
     console.log(
-      `Collection details:\n\ttype: ${collection.type}\n\tname: ${collection.name}\n\tcreation time: ${collection.creation_time}`
+      `Collection details:\n\ttype: ${collection.data.type}\n\tname: ${collection.data.name}\n\tcreation time: ${collection.data.creation_time}`
     );
 
     return collection;
@@ -161,20 +165,19 @@ class PvaultGettingStarted {
   ) {
     const _ = undefined;
     console.log(`Adding objects to collection ${collection.name}...`);
-
+    const object_client = new ObjectsApi(this.conf)
     // Add objects to collection
-    const resultObjects = await ObjectsService.addObjects(
-      collection.name,
-      "AppFunctionality",
-      objects,
-      "json"
+    const resultObjects = await object_client.addObjects(
+          collection.name,
+          "AppFunctionality",
+          objects,
     );
 
-    if (!resultObjects.ok) throw new Error("Failed to add objects to the collection.");
+    if (!resultObjects.data.ok) throw new Error("Failed to add objects to the collection.");
     console.log(
       `Added objects with the following ID's to collection ${
         collection.name
-      }:${resultObjects.results.map((item) => `\n\t${item.id}`)}`
+      }:${resultObjects.data.results.map((item) => `\n\t${item.id}`)}`
     );
 
     console.log(
@@ -187,10 +190,12 @@ class PvaultGettingStarted {
     // however, you might want to skip the ones in between, hence the usage of _ = undefined
     // It would be a good idea to wrap these generated API functions in your own functions
     // based on your desired usage
-    const searchResult = await ObjectsService.searchObjects(
+    const searchResult = await object_client.searchObjects(
       collection.name,
       "AppFunctionality",
-      { match: { email: "john@somemail.com" } },
+      {
+        match: { email: "john@somemail.com" },
+      },
       _,
       _,
       _,
@@ -200,15 +205,15 @@ class PvaultGettingStarted {
       ["id", "email"]
     );
 
-    if (searchResult.results.length === 0)
+    if (searchResult.data.results.length === 0)
       throw new Error("Failed to search objects in the collection.");
     console.log(
-      `Found the following objects in collection ${collection.name}:${searchResult.results.map(
+      `Found the following objects in collection ${collection.name}:${searchResult.data.results.map(
         (item: RemoteCustomersCollectionObject) => `\n\t${JSON.stringify(item)}`
       )}`
     );
 
-    return resultObjects.results;
+    return resultObjects.data.results;
   }
 
   public async tokenizeObject(
@@ -218,31 +223,35 @@ class PvaultGettingStarted {
     searchTokenRequest: QueryToken
   ) {
     console.log(`Tokenizing object with ID ${object.id} in collection ${collection.name}...`);
-
+    const token_client = new TokensApi(this.conf)
     // Tokenize object
-    const tokens = await TokensService.tokenize(collection.name, "AppFunctionality", [
-      tokenRequest,
-    ]);
+    const tokens = await token_client.tokenize(
+      collection.name,
+      "AppFunctionality",
+      [
+        tokenRequest
+      ]
+    );
 
-    if (!tokens[0]) throw new Error("Failed to tokenize object.");
+    if (!tokens.data[0]) throw new Error("Failed to tokenize object.");
     console.log(
-      `Tokenized object with ID ${object.id} in collection ${collection.name} with token ID ${tokens[0].token_id}.`
+      `Tokenized object with ID ${object.id} in collection ${collection.name} with token ID ${tokens.data[0].token_id}.`
     );
 
     // Search for token
-    const searchTokens = await TokensService.searchTokens(
+    const searchTokens = await token_client.searchTokens(
       collection.name,
       "AppFunctionality",
       searchTokenRequest
     );
 
-    if (!searchTokens[0])
+    if (!searchTokens.data[0])
       throw new Error(`Failed to find a token for the object with ID ${object.id}.`);
     console.log(
-      `Found token with ID ${searchTokens[0].token_id} in collection ${collection.name}.`
+      `Found token with ID ${searchTokens.data[0].token_id} in collection ${collection.name}.`
     );
 
-    return tokens[0].token_id;
+    return tokens.data[0].token_id;
   }
 
   public async queryObjects(
@@ -254,49 +263,49 @@ class PvaultGettingStarted {
     const _ = undefined;
 
     console.log(`Querying paginated objects in collection ${collection.name}...`);
-
+    const object_client = new ObjectsApi(this.conf)
     // Query all objects with pagination enabled
-    const allObjects = await ObjectsService.listObjects(
+    const allObjects = await object_client.listObjects(
       collection.name,
       "AppFunctionality",
       _,
       _,
-      1,
+      _,
       _,
       _,
       _,
       ["unsafe"]
     );
 
-    if (allObjects.results.length === 0)
+    if (allObjects.data.results.length === 0)
       throw new Error("Failed to query objects in the collection.");
     console.log(
-      `Found the following objects in collection ${collection.name}:${allObjects.results.map(
+      `Found the following objects in collection ${collection.name}:${allObjects.data.results.map(
         (item: RemoteCustomersCollectionObject) => `\n\t${JSON.stringify(item)}`
       )}`
     );
-    console.log(`Pagination:\n\t${JSON.stringify(allObjects.paging)}`);
+    console.log(`Pagination:\n\t${JSON.stringify(allObjects.data.paging)}`);
 
     console.log(`\nQuerying for a specific object by ID in collection ${collection.name}...`);
 
     // Query only one object with a specific prop
-    const objectWithProp = await ObjectsService.listObjects(
+    const objectWithProp = await object_client.listObjects(
       collection.name,
       "AppFunctionality",
-      _,
-      _,
-      _,
-      _,
-      _,
-      [object.id!],
-      _,
-      [prop]
+        _,
+        _,
+        _,
+        _,
+        _,
+        [object.id!],
+        _,
+        [prop]
     );
 
-    if (objectWithProp.results.length === 0)
+    if (objectWithProp.data.results.length === 0)
       throw new Error(`Failed to query object-${object.id} in the collection with ${prop} prop.`);
     console.log(
-      `Found the following objects in collection ${collection.name}:${objectWithProp.results.map(
+      `Found the following objects in collection ${collection.name}:${objectWithProp.data.results.map(
         (item: RemoteCustomersCollectionObject) => `\n\t${JSON.stringify(item)}`
       )}`
     );
@@ -306,49 +315,49 @@ class PvaultGettingStarted {
     );
 
     // Query only one object with all the props
-    const objectsWithAllProps = await ObjectsService.listObjects(
+    const objectsWithAllProps = await object_client.listObjects(
       collection.name,
       "AppFunctionality",
-      _,
-      _,
-      _,
-      _,
-      _,
-      [object.id!],
-      _,
-      collection.properties.map((item) => item.name)
+        _,
+        _,
+        _,
+        _,
+        _,
+        [object.id!],
+        _,
+        collection.properties.map((item) => item.name)
     );
-    if (objectsWithAllProps.results.length === 0)
+    if (objectsWithAllProps.data.results.length === 0)
       throw new Error(`Failed to query object-${object.id} in the collection.`);
 
     console.log(
       `Found the following objects in collection ${
         collection.name
-      }:${objectsWithAllProps.results.map(
+      }:${objectsWithAllProps.data.results.map(
         (item: RemoteCustomersCollectionObject) => `\n\t${JSON.stringify(item)}`
       )}`
     );
 
     // Query only one object with all the props masked
-    const objectsWithMasks = await ObjectsService.listObjects(
-      collection.name,
+    const objectsWithMasks = await object_client.listObjects(
+        collection.name,
       "AppFunctionality",
-      _,
-      _,
-      _,
-      _,
-      _,
-      [object.id!],
-      _,
-      collection.properties
-        .map((item) => `${item.name}.mask`)
-        .filter((item) => item !== "zip_code_us.mask")
+        _,
+        _,
+        _,
+        _,
+        _,
+        [object.id!],
+        _,
+        collection.properties
+          .map((item) => `${item.name}.mask`)
+          .filter((item) => item !== "zip_code_us.mask")
     );
-    if (objectsWithMasks.results.length === 0)
+    if (objectsWithMasks.data.results.length === 0)
       throw new Error(`Failed to query object-${object.id} in the collection.`);
 
     console.log(
-      `Found the following objects in collection ${collection.name}:${objectsWithMasks.results.map(
+      `Found the following objects in collection ${collection.name}:${objectsWithMasks.data.results.map(
         (item: RemoteCustomersCollectionObject) => `\n\t${JSON.stringify(item)}`
       )}`
     );
@@ -363,14 +372,23 @@ class PvaultGettingStarted {
     const _ = undefined;
     console.log(`Deleting token with ID ${tokenId} in collection ${collection.name}...`);
 
+    const token_client = new TokensApi(this.conf)
+    const object_client = new ObjectsApi(this.conf)
+
     // Delete token
-    await TokensService.deleteTokens(collection.name, "AppFunctionality", _, _, [tokenId]);
-    const tokens = await TokensService.searchTokens(
+    await token_client.deleteTokens(
       collection.name,
       "AppFunctionality",
-      searchTokenRequest
+      _,
+      _,
+      [tokenId],
     );
-    if (tokens.length !== 0)
+    const tokens = await token_client.searchTokens(
+          collection.name,
+          "AppFunctionality",
+          searchTokenRequest,
+    );
+    if (tokens.data.length !== 0)
       throw new Error(
         `Failed to delete token with ID ${tokenId} in collection ${collection.name}.`
       );
@@ -378,17 +396,23 @@ class PvaultGettingStarted {
     console.log(`Deleting object with ID ${objectId} in collection ${collection.name}...`);
 
     // Delete object
-    const deleteResult = await ObjectsService.deleteObjectById(
+    const deleteResult = await object_client.deleteObjectById(
       collection.name,
       objectId,
-      "AppFunctionality"
+    "AppFunctionality",
     );
     try {
-      await ObjectsService.getObjectById(collection.name, objectId, "AppFunctionality", _, _, _, [
-        "unsafe",
-      ]);
-    } catch (error: ApiError | any) {
-      if (error.body.error_code !== "PV3005")
+      await object_client.getObjectById(
+        collection.name,
+        objectId,
+          "AppFunctionality",
+        _,
+        _,
+        _,
+        ["unsafe"]
+      );
+    } catch (error: any) {
+      if (error.response.status !== 404)
         throw new Error(
           `Failed to delete object with ID ${objectId} in collection ${collection.name}.`
         );
@@ -400,7 +424,8 @@ class PvaultGettingStarted {
 const pvaultGettingStarted = new PvaultGettingStarted(
   process.env.PVAULT_HOST || "http://localhost",
   process.env.PVAULT_PORT || "8123",
-  process.env.PVAULT_TOKEN || "pvaultauth"
+  process.env.PVAULT_TOKEN || "pvaultauth",
+    null
 );
 
 // Run the demo
