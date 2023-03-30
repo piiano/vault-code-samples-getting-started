@@ -108,11 +108,8 @@ public class TestTokens {
         RotateResult rotateResult = new RotateResult(rotatedTokens);
 
         // Assert that the original token ids can no longer be used to detokenize.
-        ErrorHelper.expectError(
-            () -> singleDetokenize(tokenizeResult),
-            ApiError.fromStatusCodeAndMessage(Response.Status.NOT_FOUND,
-                "PV3087",
-                "One or more token IDs not found."));
+        var results = singleDetokenize(tokenizeResult);
+        Assertions.assertEquals(0, results.getDetokenizedTokens().size());
 
         // Create a new TokenizeResult in which the original token ids are replaced by the rotated ones.
         var rotatedTokenizeResult = rotateResult.rotate(tokenizeResult);
