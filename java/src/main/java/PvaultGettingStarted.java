@@ -20,7 +20,7 @@ public class PvaultGettingStarted {
     public static final List<String> NO_OPTIONS = emptyList();
     public static final String USE_DEFAULT_TTL = "";
     public static final String UNSAFE_OPTION = "unsafe"; // fetch all the properties
-
+    public static final String TRANSACTION_ID=""; // Transaction ID is only relevant for advanced usage
     public static final int PVAULT_ADDRESS = 8123;
 
     public void run() throws Exception {
@@ -171,8 +171,8 @@ public class PvaultGettingStarted {
         tokenizeRequest.setType(TokenType.POINTER);
         tokenizeRequest.setTags(ImmutableList.of("token_tag"));
 
-        String token = tokensApi.tokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, ImmutableList.of(tokenizeRequest),
-                USE_DEFAULT_TTL, NO_ADHOC_REASON, false).get(0).getTokenId();
+        String token = tokensApi.tokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, List.of(tokenizeRequest),
+                                          USE_DEFAULT_TTL, TRANSACTION_ID, NO_ADHOC_REASON, false).get(0).getTokenId();
         print("Token: ", token);
         return token;
     }
