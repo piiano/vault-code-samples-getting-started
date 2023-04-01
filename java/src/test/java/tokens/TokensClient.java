@@ -23,7 +23,8 @@ public class TokensClient {
 
     public List<TokenValue> tokenize(String collectionName, List<TokenizeRequest> tokenizeRequest) throws ApiException {
         return collections.tokenize(collectionName, APP_FUNCTIONALITY_REASON,
-                tokenizeRequest, USE_DEFAULT_TTL, NO_ADHOC_REASON, RELOAD_CACHE);
+                                    tokenizeRequest, USE_DEFAULT_TTL, TRANSACTION_ID,
+                                    NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
     public List<DetokenizedToken> detokenize(String collectionName, TokenDefinition tokens, boolean includeMetadata, boolean archived) throws ApiException {
