@@ -1,4 +1,2 @@
 node_modules/
-build/
-openapi.yaml
 package-lock.json
