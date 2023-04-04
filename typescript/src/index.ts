@@ -1,7 +1,6 @@
 import {
   Collection,
   CollectionsClient,
-  Object,
   ObjectsClient,
   QueryToken,
   TokenizeRequest,
@@ -11,7 +10,7 @@ import {
 } from "@piiano/vault-client";
 
 // Type definitions for Customer object
-interface Customer extends Object {
+interface Customer {
   ssn: string;
   email: string;
   phone_number?: string;
@@ -93,10 +92,8 @@ export default async function vaultGettingStarted(options?: VaultClientOptions) 
   await queryObjects(vaultClient.objects, collection, customers, customers[0], "ssn");
 
   console.log("\n\n== Step 7: Delete data ==\n\n");
-  await deleteObject(
-    vaultClient.tokens,
-    vaultClient.objects,
-    collectionName, tokenId, customers[0].id!, searchTokenRequest);
+  await cleanResources(
+    vaultClient, collectionName, tokenId, customers[0].id!, searchTokenRequest);
 
   console.log("\n\nDone!\n");
 }
@@ -288,9 +285,8 @@ async function queryObjects(
   );
 }
 
-async function deleteObject(
-  tokensClient: TokensClient,
-  objectsClient: ObjectsClient,
+async function cleanResources(
+  vaultClient: VaultClient,
   collection: string,
   tokenId: string,
   objectId: string,
@@ -299,11 +295,11 @@ async function deleteObject(
   console.log(`Deleting token with ID ${tokenId} in collection ${collection}...`);
 
   // Delete token
-  await tokensClient.deleteTokens({
+  await vaultClient.tokens.deleteTokens({
     collection, reason,
     tokenIds: [tokenId],
   });
-  const tokens = await tokensClient.searchTokens({
+  const tokens = await vaultClient.tokens.searchTokens({
     collection, reason,
     requestBody: searchTokenRequest,
   });
@@ -315,13 +311,13 @@ async function deleteObject(
   console.log(`Deleting object with ID ${objectId} in collection ${collection}...`);
 
   // Delete object
-  await objectsClient.deleteObjectById({
+  await vaultClient.objects.deleteObjectById({
     collection,
     reason,
     id: objectId,
   });
 
-  const error = await objectsClient.getObjectById({
+  const error = await vaultClient.objects.getObjectById({
     collection,
     reason,
     id: objectId,
@@ -330,4 +326,12 @@ async function deleteObject(
 
   if (error.status !== 404)
     throw new Error(`Failed to delete object with ID ${objectId} in collection ${collection}.`);
+
+  // Delete collection
+  console.log(`Deleting collection ${collection}...`);
+  await vaultClient.collections.deleteCollection({ collection });
+
+  const collections = await vaultClient.collections.listCollections({});
+  if (collections.length !== 0)
+    throw new Error(`Failed to delete collection ${collection}.`);
 }

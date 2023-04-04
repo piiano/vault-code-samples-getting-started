@@ -23,6 +23,8 @@ describe('getting started', () => {
   after(testVaultServer.stop.bind(testVaultServer));
 
   it('should be able to run as an e2e test', async function () {
+    this.timeout(1000);
+    this.slow(500);
     await vaultGettingStarted({
       vaultURL: `http://localhost:${port}`,
       apiKey: "pvaultauth",

@@ -20,11 +20,15 @@ jobs:
        uses: actions/setup-node@v3
        with:
          node-version: '18.x'
-         cache: "yarn"
-         cache-dependency-path: typescript/yarn.lock
+         cache: "npm"
+         cache-dependency-path: typescript/package-lock.json
+
+     - name: Prepare.
+       working-directory: typescript
+       run: ./prepare.sh
 
      - name: Start Vault and run tests.
        working-directory: typescript
        run: |
-         yarn --frozen-lockfile
-         yarn test
+         # Use `npm test` and not `./run.sh` because test also starts and wait automatically for the vault.          
+         npm test
