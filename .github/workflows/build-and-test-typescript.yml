@@ -26,5 +26,5 @@ jobs:
      - name: Start Vault and run tests.
        working-directory: typescript
        run: |
-         yarn
+         yarn --frozen-lockfile
          yarn test
