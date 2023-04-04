@@ -37,14 +37,14 @@ jobs:
         working-directory: java
         run: |
           shopt -s expand_aliases
-          
-          docker run --rm \
-             --name pvault-dev \
-             -p 8123:8123 \
-             -e PVAULT_DEVMODE=true \
-             -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
-             -d \
-             piiano/pvault-dev:latest
+        
+          docker run --rm -d \
+            --name pvault-dev \
+            -p 8123:8123 \
+            -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
+            -e PVAULT_SENTRY_ENABLE=false \
+            -e PVAULT_LOG_DATADOG_ENABLE=none \
+            piiano/pvault-dev:latest
           
           alias pvault="docker run --rm -i --add-host='host.docker.internal:host-gateway' -v $(pwd):/pwd -w /pwd piiano/pvault-cli:latest"
           until pvault status > /dev/null 2>&1
