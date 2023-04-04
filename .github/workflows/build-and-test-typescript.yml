@@ -4,10 +4,6 @@ on:
     paths:
       - typescript/**
   workflow_dispatch:
-  workflow_call:
-    secrets:
-      PVAULT_SERVICE_LICENSE:
-        required: false
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
@@ -19,26 +15,16 @@ jobs:
    steps:
      - name: Check Out Repo.
        uses: actions/checkout@v3
-       with:
-         repository: piiano/vault-code-samples-getting-started
 
      - name: Install Node.js
-       uses: actions/setup-node@v2
+       uses: actions/setup-node@v3
        with:
          node-version: '18.x'
-
-     - name: Prepare TypeScript
-       run: |
-         cd typescript && ./prepare.sh
+         cache: "yarn"
+         cache-dependency-path: typescript/yarn.lock
 
      - name: Start Vault and run tests.
+       working-directory: typescript
        run: |
-         docker run --rm \
-           --name pvault-dev \
-           -p 8123:8123 \
-           -e PVAULT_DEVMODE=true \
-           -e PVAULT_SERVICE_LICENSE=${PVAULT_SERVICE_LICENSE} \
-           -d \
-           piiano/pvault-dev:latest
-         sleep 10
-         cd typescript && chmod +x ./run.sh && ./run.sh
+         yarn
+         yarn test

@@ -1,10 +1,10 @@
 {
   "include": [
-    "**/*"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
-    "build"
+    "src/**/*.spec.ts"
   ],
   "compilerOptions": {
     "strict": true,
@@ -13,8 +13,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "outDir": "build",
-    "rootDir": "./",
-    "sourceMap": true
+    "noEmit": true
   }
 }
