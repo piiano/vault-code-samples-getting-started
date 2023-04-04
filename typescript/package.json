@@ -1,7 +1,7 @@
 {
   "name": "@piiano/getting-started-typescript",
   "version": "0.0.2",
-  "description": "getting started with Piiano vault using typescript",
+  "description": "Getting started with Piiano Vault using Typescript",
   "scripts": {
     "start": "ts-node src/start.ts",
     "test": "mocha --require ts-node/register src/**/*.spec.ts"
