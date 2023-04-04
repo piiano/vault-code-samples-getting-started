@@ -26,9 +26,11 @@ jobs:
        uses: actions/setup-python@v4
 
      - name: Prepare.
-       run: cd python && ./prepare.sh
+       working-directory: python
+       run: ./prepare.sh
 
      - name: Start Vault and run tests.
+       working-directory: python
        run: |
         shopt -s expand_aliases
 
@@ -44,7 +46,7 @@ jobs:
         until pvault status > /dev/null 2>&1
         do echo "Waiting for the vault to start ..." && sleep 1; done
 
-        cd python && ./run.sh
+        ./run.sh
 
      - name: Stop Vault.
        run: docker stop pvault-dev
