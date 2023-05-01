@@ -1,16 +1,12 @@
 package objects;
 
-import common.Client;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.ObjectsApi;
 import org.openapitools.client.model.ObjectFieldsPage;
 import org.openapitools.client.model.ObjectID;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static common.Client.*;
 
@@ -28,7 +24,7 @@ public class ObjectsClient {
     }
 
     public ObjectFieldsPage get(String collectionName, List<UUID> ids, List<String> props) throws ApiException {
-        var options = new ArrayList<String>();
+        var options = new HashSet<String>();
         if (props == null) {
             options.add("unsafe");
         }
@@ -38,6 +34,6 @@ public class ObjectsClient {
 
     public void deleteById(String collectionName, UUID id) throws ApiException {
         objects.deleteObjectById(collectionName, id, APP_FUNCTIONALITY_REASON,
-                Client.NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
+                NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
     }
 }

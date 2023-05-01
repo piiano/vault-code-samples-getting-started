@@ -1,4 +1,5 @@
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.Configuration;
@@ -9,6 +10,7 @@ import org.openapitools.client.model.*;
 import java.util.*;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 public class PvaultGettingStarted {
 
@@ -17,7 +19,7 @@ public class PvaultGettingStarted {
     public static final String JSON = "json";
     public static final String APP_FUNCTIONALITY_REASON = "AppFunctionality";
     public static final String NO_ADHOC_REASON = "";
-    public static final List<String> NO_OPTIONS = emptyList();
+    public static final Set<String> NO_OPTIONS = emptySet();
     public static final String USE_DEFAULT_TTL = "";
     public static final String UNSAFE_OPTION = "unsafe"; // fetch all the properties
     public static final String NO_TRANSACTION_ID=""; // Transaction ID is only relevant for advanced usage
@@ -83,7 +85,7 @@ public class PvaultGettingStarted {
         print("Verifying the test collection is not present");
         try {
             List<Property> mp =
-                    collectionpropApi.listCollectionProperties(COLLECTION_NAME,new ArrayList<>());
+                    collectionpropApi.listCollectionProperties(COLLECTION_NAME, NO_OPTIONS);
             throw new RuntimeException("Collection " + COLLECTION_NAME + " already exists.\n" +
                   "Recreate the Vault from scratch or uncomment deleteCollection()" +
                   " in this code. Bailing out.\n");
@@ -164,9 +166,10 @@ public class PvaultGettingStarted {
     private static String tokenizeData(UUID id, TokensApi tokensApi) throws ApiException {
 
         TokenizeRequest tokenizeRequest = new TokenizeRequest();
-        InputObject object_id = new InputObject();
-        object_id.setId(id);
-        tokenizeRequest.setObject(object_id);
+        InputObject object = new InputObject();
+        object.setId(id);
+        object.setFields(null);
+        tokenizeRequest.setObject(object);
         tokenizeRequest.addPropsItem("email");
         tokenizeRequest.setType(TokenType.POINTER);
         tokenizeRequest.setTags(ImmutableList.of("token_tag"));
@@ -189,7 +192,7 @@ public class PvaultGettingStarted {
 
         ObjectFieldsPage objectIdsPage =
                 objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, NO_ADHOC_REASON,
-                        false, 1, "", "", emptyList(), ImmutableList.of(UNSAFE_OPTION), null);
+                        false, 1, "", "", emptyList(), ImmutableSet.of(UNSAFE_OPTION), null);
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
@@ -205,7 +208,7 @@ public class PvaultGettingStarted {
 
         ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
                 NO_ADHOC_REASON, false, null, "", "", ImmutableList.of(id),
-                emptyList(), ImmutableList.of("ssn"));
+                NO_OPTIONS, ImmutableList.of("ssn"));
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
@@ -219,7 +222,7 @@ public class PvaultGettingStarted {
 
         ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
                 NO_ADHOC_REASON, false, null, "", "", ImmutableList.of(id),
-                emptyList(), ImmutableList.of("ssn.mask", "email.mask", "phone_number.mask"));
+                NO_OPTIONS, ImmutableList.of("ssn.mask", "email.mask", "phone_number.mask"));
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
@@ -233,7 +236,7 @@ public class PvaultGettingStarted {
     private static void deleteToken(TokensApi tokensApi, String token) throws ApiException {
 
         tokensApi.deleteTokens(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, emptyList(), emptyList(),
-                ImmutableList.of(token), NO_OPTIONS, NO_ADHOC_REASON, false);
+                ImmutableList.of(token), null, NO_OPTIONS, NO_ADHOC_REASON, false);
     }
 
     private static void deleteObject(ObjectsApi objectsApi, UUID id) throws ApiException {
