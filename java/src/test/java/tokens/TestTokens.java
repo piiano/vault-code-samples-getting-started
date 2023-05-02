@@ -193,9 +193,10 @@ public class TestTokens {
         TokenizeRequest request = new TokenizeRequest();
         request.setTags(tags);
         request.setType(typeEnum);
-        InputObject object_id = new InputObject();
-        object_id.setId(id);
-        request.setObject(object_id);
+        InputObject object = new InputObject();
+        object.setId(id);
+        object.setFields(null);
+        request.setObject(object);
         request.setProps(props);
         return request;
     }

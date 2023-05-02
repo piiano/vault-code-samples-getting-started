@@ -9,7 +9,7 @@ echo "Delete the old generated java SDK"
 [ -d "vault_java_sdk" ] && rm -r vault_java_sdk
 
 echo "Run openapi tools to create the java SDK"
-docker run --rm -u $(id -u):$(id -g) -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.3.0 generate \
+docker run --rm -u $(id -u):$(id -g) -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.4.0 generate \
     -i local/openapi.yaml \
     -g java \
     -o local/vault_java_sdk

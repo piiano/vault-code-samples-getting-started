@@ -3,9 +3,9 @@ package common;
 import org.openapitools.client.ApiClient;
 import org.openapitools.client.Configuration;
 
-import java.util.List;
+import java.util.Set;
 
-import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 public class Client {
 
@@ -16,7 +16,7 @@ public class Client {
     public static final String NO_TRANSACTION_ID=""; // Transaction ID is only relevant for advanced usage
     public static final Boolean RELOAD_CACHE = false;
     public static final String JSON = "json";
-    public static final List<String> NO_OPTIONS = emptyList();
+    public static final Set<String> NO_OPTIONS = emptySet();
 
     public static ApiClient create() {
 

@@ -4,11 +4,8 @@ import org.openapitools.client.ApiClient;
 import org.openapitools.client.ApiException;
 import org.openapitools.client.api.TokensApi;
 import org.openapitools.client.model.*;
-import com.google.common.collect.ImmutableList;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static common.Client.*;
 import static java.util.Collections.emptyList;
@@ -28,7 +25,7 @@ public class TokensClient {
     }
 
     public List<DetokenizedToken> detokenize(String collectionName, TokenDefinition tokens, boolean includeMetadata, boolean archived) throws ApiException {
-        List<String> options = new ArrayList<>();
+        Set<String> options = new HashSet<>();
         if (includeMetadata) {
             options.add("include_metadata");
         }
