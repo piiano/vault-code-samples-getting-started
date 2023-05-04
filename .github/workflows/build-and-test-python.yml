@@ -7,7 +7,7 @@ on:
   workflow_call:
     secrets:
       PVAULT_SERVICE_LICENSE:
-        required: false
+        required: true
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
