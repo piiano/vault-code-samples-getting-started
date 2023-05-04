@@ -4,6 +4,10 @@ on:
     paths:
       - typescript/**
   workflow_dispatch:
+  workflow_call:
+    secrets:
+      PVAULT_SERVICE_LICENSE:
+        required: false
 
 env:
   PVAULT_SERVICE_LICENSE: ${{ secrets.PVAULT_SERVICE_LICENSE }}
