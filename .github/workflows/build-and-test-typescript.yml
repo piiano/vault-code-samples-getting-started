@@ -19,6 +19,8 @@ jobs:
    steps:
      - name: Check Out Repo.
        uses: actions/checkout@v3
+       with:
+         repository: piiano/vault-code-samples-getting-started
 
      - name: Install Node.js
        uses: actions/setup-node@v3
