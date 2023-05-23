@@ -1,6 +1,6 @@
 package tokens;
 
-import org.openapitools.client.model.TokenValue;
+import com.piiano.vault.client.openapi.model.TokenValue;
 
 import java.util.*;
 

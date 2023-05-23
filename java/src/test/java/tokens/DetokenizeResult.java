@@ -1,6 +1,6 @@
 package tokens;
 
-import org.openapitools.client.model.DetokenizedToken;
+import com.piiano.vault.client.openapi.model.DetokenizedToken;
 
 import java.util.List;
 

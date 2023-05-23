@@ -1,8 +1,9 @@
 package tokens;
 
-import org.openapitools.client.model.TokenValue;
+import com.piiano.vault.client.openapi.model.TokenValue;
 
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 // RotateResult contains all the information returned by the rotate API method.
@@ -22,15 +23,15 @@ class RotateResult {
     public TokenizeResult rotate(TokenizeResult tokenizeResult) {
         var objectIds = tokenizeResult.getObjectIds();
         var newTokenValues = objectIds.stream().map(
-            objectId -> {
-                var oldTokenId = tokenizeResult.getTokenId(objectId);
-                var newTokenId = oldTokenIdToNewTokenId.get(oldTokenId);
-                return toTokenValue(newTokenId);
-            }
+                objectId -> {
+                    var oldTokenId = tokenizeResult.getTokenId(objectId);
+                    var newTokenId = oldTokenIdToNewTokenId.get(oldTokenId);
+                    return toTokenValue(newTokenId);
+                }
         ).collect(Collectors.toList());
         return new TokenizeResult(
-            objectIds,              // use original object objectIds
-            newTokenValues);
+                objectIds,              // use original object objectIds
+                newTokenValues);
     }
 
     TokenValue toTokenValue(String tokenId) {

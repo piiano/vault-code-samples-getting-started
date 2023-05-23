@@ -1,8 +1,8 @@
 package common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.piiano.vault.client.openapi.ApiException;
 import org.junit.jupiter.api.Assertions;
-import org.openapitools.client.ApiException;
 
 public class ErrorHelper {
 

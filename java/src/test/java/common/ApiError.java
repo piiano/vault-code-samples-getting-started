@@ -2,7 +2,7 @@ package common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.openapitools.client.ApiException;
+import com.piiano.vault.client.openapi.ApiException;
 
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -13,7 +13,8 @@ public class ApiError {
     public String message;
     public HashMap<String, String> context;
 
-    public ApiError(){}
+    public ApiError() {
+    }
 
     private ApiError(Response.Status status, String error_code, String message, HashMap<String, String> context) {
         this.status = status;

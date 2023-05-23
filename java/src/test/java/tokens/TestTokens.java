@@ -2,6 +2,9 @@ package tokens;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableList;
+import com.piiano.vault.client.openapi.ApiClient;
+import com.piiano.vault.client.openapi.ApiException;
+import com.piiano.vault.client.openapi.model.*;
 import common.*;
 import objects.ObjectsClient;
 import org.junit.jupiter.api.AfterEach;
@@ -11,9 +14,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.openapitools.client.ApiClient;
-import org.openapitools.client.ApiException;
-import org.openapitools.client.model.*;
 
 import javax.ws.rs.core.Response;
 import java.util.*;
@@ -32,6 +32,28 @@ public class TestTokens {
 
     private final List<String> props = ImmutableList.of("id", "ssn", "email");
     private final List<String> tags = ImmutableList.of("token_tag_1");
+
+    private static Stream<Arguments> tokenizationTypeAndArchived() {
+        return Stream.of(
+                arguments(TokenType.POINTER, true),
+                arguments(TokenType.POINTER, false),
+                arguments(TokenType.RANDOMIZED, true),
+                arguments(TokenType.RANDOMIZED, false),
+                arguments(TokenType.PCI, true),
+                arguments(TokenType.PCI, false),
+                arguments(TokenType.DETERMINISTIC, true),
+                arguments(TokenType.DETERMINISTIC, false)
+        );
+    }
+
+    private static Stream<Arguments> reversibleTokenTypes() {
+        return Stream.of(
+                arguments(TokenType.POINTER),
+                arguments(TokenType.RANDOMIZED),
+                arguments(TokenType.PCI),
+                arguments(TokenType.DETERMINISTIC)
+        );
+    }
 
     @BeforeEach()
     public void beforeEach() throws ApiException {
@@ -65,7 +87,7 @@ public class TestTokens {
     @ParameterizedTest
     @MethodSource("tokenizationTypeAndArchived")
     public void cannotDetokenizeArchivedObjects(
-        TokenType tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
+            TokenType tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
 
         batchTokenize(tokenType);
 
@@ -78,7 +100,7 @@ public class TestTokens {
     @ParameterizedTest
     @MethodSource("tokenizationTypeAndArchived")
     public void cannotDetokenizeArchivedTokens(
-        TokenType tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
+            TokenType tokenType, boolean detokenizeArchived) throws ApiException, JsonProcessingException {
 
         // Batch tokenize
         TokenizeResult tokenizeResult = batchTokenize(tokenType);
@@ -87,7 +109,7 @@ public class TestTokens {
         var firstObjectId = setup.getObjectIds().get(0);
         var tokenIdOfFirstObjectId = tokenizeResult.getTokenId(firstObjectId);
         tokensClient.archiveTokens(
-            setup.getCollection().getName(), TokenDefinition.fromTokenIds(List.of(tokenIdOfFirstObjectId)));
+                setup.getCollection().getName(), TokenDefinition.fromTokenIds(List.of(tokenIdOfFirstObjectId)));
 
         // Should succeed but now test that the incorrect result occurs
         assertIncorrectBehavior(detokenizeArchived);
@@ -102,8 +124,8 @@ public class TestTokens {
 
         // Rotate the tokens
         Map<String, String> rotatedTokens = tokensClient.rotateTokens(
-            setup.getCollection().getName(),
-            tokenizeResult.getTokenIds());
+                setup.getCollection().getName(),
+                tokenizeResult.getTokenIds());
 
         RotateResult rotateResult = new RotateResult(rotatedTokens);
 
@@ -135,44 +157,22 @@ public class TestTokens {
         updateTokenRequest.setTags(newTags);
 
         tokensClient.updateTokens(
-            setup.getCollection().getName(),
-            TokenDefinition.fromTags(tags),
-            updateTokenRequest);
+                setup.getCollection().getName(),
+                TokenDefinition.fromTags(tags),
+                updateTokenRequest);
 
         // Search tokens by the new tags.
         var queryToken = new QueryToken();
         queryToken.setTags(newTags);
 
         List<TokenMetadata> tokenMetadata = tokensClient.searchTokens(
-            setup.getCollection().getName(), queryToken);
+                setup.getCollection().getName(), queryToken);
 
         SearchResult searchResult = new SearchResult(tokenMetadata);
 
         // and verify that all token ids are present and are associated with the correct object id.
         // Enable this assertion in the release
         assertSearchResultsMatchTokenizeResult(tokenizeResult, searchResult);
-    }
-
-    private static Stream<Arguments> tokenizationTypeAndArchived() {
-        return Stream.of(
-                arguments(TokenType.POINTER, true),
-                arguments(TokenType.POINTER, false),
-                arguments(TokenType.RANDOMIZED, true),
-                arguments(TokenType.RANDOMIZED, false),
-                arguments(TokenType.PCI, true),
-                arguments(TokenType.PCI, false),
-                arguments(TokenType.DETERMINISTIC, true),
-                arguments(TokenType.DETERMINISTIC, false)
-        );
-    }
-
-    private static Stream<Arguments> reversibleTokenTypes() {
-        return Stream.of(
-                arguments(TokenType.POINTER),
-                arguments(TokenType.RANDOMIZED),
-                arguments(TokenType.PCI),
-                arguments(TokenType.DETERMINISTIC)
-        );
     }
 
     // Batch tokenize the 'props' of the 'objectIds' adding the 'tags' to each token.
@@ -188,7 +188,7 @@ public class TestTokens {
     }
 
     private TokenizeRequest createTokenizeRequest(
-        TokenType typeEnum, UUID id, List<String> props, List<String> tags) {
+            TokenType typeEnum, UUID id, List<String> props, List<String> tags) {
 
         TokenizeRequest request = new TokenizeRequest();
         request.setTags(tags);
@@ -210,10 +210,10 @@ public class TestTokens {
 
             // Detokenize this token only
             var detokenizedToken = tokensClient.detokenize(
-                setup.getCollection().getName(),
-                TokenDefinition.fromTokenIds(List.of(tokenValue.getTokenId())),
-                true,
-                false);
+                    setup.getCollection().getName(),
+                    TokenDefinition.fromTokenIds(List.of(tokenValue.getTokenId())),
+                    true,
+                    false);
 
             // Accumulate the detokenized token
             detokenizedTokens.addAll(detokenizedToken);
@@ -224,18 +224,18 @@ public class TestTokens {
     private DetokenizeResult batchDetokenize() throws ApiException {
         // Batch detokenize by 'tags' (all tokens have the same tags, so this should detokenize all)
         var detokenizedTokens = tokensClient.detokenize(
-            setup.getCollection().getName(),
-            TokenDefinition.fromTags(tags),
-            true,
-            false);
+                setup.getCollection().getName(),
+                TokenDefinition.fromTags(tags),
+                true,
+                false);
 
         return new DetokenizeResult(detokenizedTokens);
     }
 
     // Assert that the detokenized result is correct.
     private void assertDetokenizeResultIsCorrect(
-        TokenizeResult tokenizeResult,
-        DetokenizeResult detokenizeResult) {
+            TokenizeResult tokenizeResult,
+            DetokenizeResult detokenizeResult) {
 
         var detokenizedTokens = detokenizeResult.getDetokenizedTokens();
 
@@ -257,15 +257,15 @@ public class TestTokens {
     }
 
     private void assertDetokenizeReturnsExpectedTokenIds(
-        List<TokenValue> tokenValues, List<DetokenizedToken> deTokenizedTokens) {
+            List<TokenValue> tokenValues, List<DetokenizedToken> deTokenizedTokens) {
 
         // Get the set of tokenIds from the tokenized values
         var expectedTokenIds = tokenValues.stream().map(
-            TokenValue::getTokenId).collect(Collectors.toCollection(HashSet::new));
+                TokenValue::getTokenId).collect(Collectors.toCollection(HashSet::new));
 
         // Get the set of tokenIds from the detokenized tokens
         var actualTokenIds = deTokenizedTokens.stream().map(
-            DetokenizedToken::getTokenId).collect(Collectors.toCollection(HashSet::new));
+                DetokenizedToken::getTokenId).collect(Collectors.toCollection(HashSet::new));
 
         Assertions.assertEquals(expectedTokenIds, actualTokenIds);
     }
@@ -274,13 +274,13 @@ public class TestTokens {
     private void assertIncorrectBehavior(boolean detokenizeArchived) throws JsonProcessingException, ApiException {
         if (detokenizeArchived) {
             ApiMethod detokenizeMethod = () -> tokensClient.detokenize(
-                setup.getCollection().getName(),
-                TokenDefinition.fromTags(tags), false, true);
+                    setup.getCollection().getName(),
+                    TokenDefinition.fromTags(tags), false, true);
             ErrorHelper.expectError(detokenizeMethod, ApiError.fromStatus(Response.Status.BAD_REQUEST));
         } else {
             var result = tokensClient.detokenize(
-                setup.getCollection().getName(),
-                TokenDefinition.fromTags(tags), false, false);
+                    setup.getCollection().getName(),
+                    TokenDefinition.fromTags(tags), false, false);
             Assertions.assertEquals(2, result.size());
         }
     }
@@ -288,8 +288,8 @@ public class TestTokens {
     private void assertSearchResultsMatchTokenizeResult(TokenizeResult tokenizeResult, SearchResult searchResult) {
         for (var tokenId : tokenizeResult.getTokenIds()) {
             Assertions.assertEquals(
-                tokenizeResult.getObjectIds(tokenId),
-                searchResult.getObjectIds(tokenId));
+                    tokenizeResult.getObjectIds(tokenId),
+                    searchResult.getObjectIds(tokenId));
         }
     }
 }

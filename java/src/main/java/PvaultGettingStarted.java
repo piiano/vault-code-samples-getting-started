@@ -1,11 +1,8 @@
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.openapitools.client.ApiClient;
-import org.openapitools.client.ApiException;
-import org.openapitools.client.Configuration;
-import org.openapitools.client.api.*;
-import org.openapitools.client.model.Collection;
-import org.openapitools.client.model.*;
+import com.piiano.vault.client.openapi.*;
+import com.piiano.vault.client.openapi.model.Collection;
+import com.piiano.vault.client.openapi.model.*;
 
 import java.util.*;
 
@@ -18,47 +15,12 @@ public class PvaultGettingStarted {
     public static final String HEALTH_PASS = "pass";
     public static final String JSON = "json";
     public static final String APP_FUNCTIONALITY_REASON = "AppFunctionality";
-    public static final String NO_ADHOC_REASON = "";
+    public static final String NO_ADHOC_REASON = null;
     public static final Set<String> NO_OPTIONS = emptySet();
     public static final String USE_DEFAULT_TTL = "";
     public static final String UNSAFE_OPTION = "unsafe"; // fetch all the properties
-    public static final String NO_TRANSACTION_ID=""; // Transaction ID is only relevant for advanced usage
+    public static final String NO_TRANSACTION_ID = null; // Transaction ID is only relevant for advanced usage
     public static final int PVAULT_ADDRESS = 8123;
-
-    public void run() throws Exception {
-
-        print("\n\n== Steps 1 + 2: Connect to Piiano vault and check status ==\n\n");
-        ApiClient pvaultClient = getApiClient();
-        checkPvaultStatus(pvaultClient);
-
-        print("\n\n== Step 3: Create a collection ==\n\n");
-        CollectionsApi collectionsApi = new CollectionsApi(pvaultClient);
-        CollectionPropertiesApi collectionpropapi = new CollectionPropertiesApi(pvaultClient);
-        // deleteCollection(collectionsApi);
-        verifyNoCollections(collectionpropapi);
-        createCollection(collectionsApi);
-
-        print("\n\n== Step 4: Add data ==\n\n");
-        ObjectsApi objectsApi = new ObjectsApi(pvaultClient);
-        List<UUID> customerIds = addData(objectsApi);
-
-        print("\n\n== Step 5: Tokenize data ==\n\n");
-        TokensApi tokensApi = new TokensApi(pvaultClient);
-        String token = tokenizeData(customerIds.get(0), tokensApi);
-
-        detokenizeToken(tokensApi, token);
-
-        print("\n\n== Step 6: Query your data ==\n\n");
-        queryAllObjectsWithPageSize(objectsApi);
-        queryPropertiesOfObjectsById(objectsApi, customerIds.get(0));
-        getTransformedPropertiesOfObjects(objectsApi, customerIds.get(0));
-
-        print("\n\n== Step 7: Delete data ==\n\n");
-        deleteToken(tokensApi, token);
-        deleteObject(objectsApi, customerIds.get(0));
-
-        print("Done!\n");
-    }
 
     private static void checkPvaultStatus(ApiClient pvaultClient) throws ApiException {
 
@@ -87,13 +49,12 @@ public class PvaultGettingStarted {
             List<Property> mp =
                     collectionpropApi.listCollectionProperties(COLLECTION_NAME, NO_OPTIONS);
             throw new RuntimeException("Collection " + COLLECTION_NAME + " already exists.\n" +
-                  "Recreate the Vault from scratch or uncomment deleteCollection()" +
-                  " in this code. Bailing out.\n");
+                    "Recreate the Vault from scratch or uncomment deleteCollection()" +
+                    " in this code. Bailing out.\n");
         } catch (ApiException e) {
             if (e.getCode() == 404) {
-                print("Collection "  + COLLECTION_NAME + " not found. Will create it");
-            }
-            else {
+                print("Collection " + COLLECTION_NAME + " not found. Will create it");
+            } else {
                 throw new ApiException(e);
             }
         }
@@ -109,7 +70,7 @@ public class PvaultGettingStarted {
 
         collection.addPropertiesItem(
                 buildProperty("ssn", "SSN", "Social security number",
-                true, false, true, false));
+                        true, false, true, false));
 
         collection.addPropertiesItem(
                 buildProperty("email", "EMAIL", "EMAIL",
@@ -175,7 +136,7 @@ public class PvaultGettingStarted {
         tokenizeRequest.setTags(ImmutableList.of("token_tag"));
 
         String token = tokensApi.tokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, List.of(tokenizeRequest),
-                                          USE_DEFAULT_TTL, NO_TRANSACTION_ID, NO_ADHOC_REASON, false).get(0).getTokenId();
+                USE_DEFAULT_TTL, NO_TRANSACTION_ID, NO_ADHOC_REASON, false).get(0).getTokenId();
         print("Token: ", token);
         return token;
     }
@@ -292,15 +253,49 @@ public class PvaultGettingStarted {
         PvaultGettingStarted pvaultGettingStarted = new PvaultGettingStarted();
         try {
             pvaultGettingStarted.run();
-        } catch (org.openapitools.client.ApiException apiException) {
+        } catch (ApiException apiException) {
             if (apiException.getMessage().contains("java.net.ConnectException")) {
                 print(apiException.getMessage() + "\n\nIs the Vault running?\n");
-            }
-            else {
+            } else {
                 throw new RuntimeException(apiException);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void run() throws Exception {
+
+        print("\n\n== Steps 1 + 2: Connect to Piiano vault and check status ==\n\n");
+        ApiClient pvaultClient = getApiClient();
+        checkPvaultStatus(pvaultClient);
+
+        print("\n\n== Step 3: Create a collection ==\n\n");
+        CollectionsApi collectionsApi = new CollectionsApi(pvaultClient);
+        CollectionPropertiesApi collectionpropapi = new CollectionPropertiesApi(pvaultClient);
+        // deleteCollection(collectionsApi);
+        verifyNoCollections(collectionpropapi);
+        createCollection(collectionsApi);
+
+        print("\n\n== Step 4: Add data ==\n\n");
+        ObjectsApi objectsApi = new ObjectsApi(pvaultClient);
+        List<UUID> customerIds = addData(objectsApi);
+
+        print("\n\n== Step 5: Tokenize data ==\n\n");
+        TokensApi tokensApi = new TokensApi(pvaultClient);
+        String token = tokenizeData(customerIds.get(0), tokensApi);
+
+        detokenizeToken(tokensApi, token);
+
+        print("\n\n== Step 6: Query your data ==\n\n");
+        queryAllObjectsWithPageSize(objectsApi);
+        queryPropertiesOfObjectsById(objectsApi, customerIds.get(0));
+        getTransformedPropertiesOfObjects(objectsApi, customerIds.get(0));
+
+        print("\n\n== Step 7: Delete data ==\n\n");
+        deleteToken(tokensApi, token);
+        deleteObject(objectsApi, customerIds.get(0));
+
+        print("Done!\n");
     }
 }
