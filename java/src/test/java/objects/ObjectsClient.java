@@ -1,12 +1,15 @@
 package objects;
 
-import org.openapitools.client.ApiClient;
-import org.openapitools.client.ApiException;
-import org.openapitools.client.api.ObjectsApi;
-import org.openapitools.client.model.ObjectFieldsPage;
-import org.openapitools.client.model.ObjectID;
+import com.piiano.vault.client.openapi.ApiClient;
+import com.piiano.vault.client.openapi.ApiException;
+import com.piiano.vault.client.openapi.ObjectsApi;
+import com.piiano.vault.client.openapi.model.ObjectFieldsPage;
+import com.piiano.vault.client.openapi.model.ObjectID;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static common.Client.*;
 

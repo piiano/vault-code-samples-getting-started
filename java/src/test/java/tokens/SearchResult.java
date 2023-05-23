@@ -1,7 +1,7 @@
 package tokens;
 
-import org.openapitools.client.model.TokenMetadata;
-import org.openapitools.client.model.TokenRefMetadata;
+import com.piiano.vault.client.openapi.model.TokenMetadata;
+import com.piiano.vault.client.openapi.model.TokenRefMetadata;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +19,7 @@ class SearchResult {
         for (var datum : tokenMetadata) {
             var tokenId = datum.getTokenId();
             var objectIds = datum.getTokens().stream().map(
-                TokenRefMetadata::getObjectId
+                    TokenRefMetadata::getObjectId
             ).collect(Collectors.toList());
 
             tokenIdToObjectIds.put(tokenId, objectIds);

@@ -1,10 +1,10 @@
 package common;
 
 import collections.CollectionsClient;
+import com.piiano.vault.client.openapi.ApiClient;
+import com.piiano.vault.client.openapi.ApiException;
+import com.piiano.vault.client.openapi.model.Collection;
 import objects.ObjectsClient;
-import org.openapitools.client.ApiClient;
-import org.openapitools.client.ApiException;
-import org.openapitools.client.model.Collection;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -18,16 +18,15 @@ public class CollectionSetup {
     private final CollectionsClient collectionsClient = new CollectionsClient(apiClient);
     private final ObjectsClient objectsClient = new ObjectsClient(apiClient);
     private final String collectionName = "customers";
-
-    private Collection collection;
     public Map<UUID, Map<String, Object>> mapObjectIdToObjectFields;
+    private Collection collection;
     private ArrayList<UUID> objectIds;
 
-    public ArrayList<UUID> getObjectIds(){
+    public ArrayList<UUID> getObjectIds() {
         return objectIds;
     }
 
-    public Collection getCollection(){
+    public Collection getCollection() {
         return collection;
     }
 
@@ -63,7 +62,7 @@ public class CollectionSetup {
 
     // Read back the objects and verify that there were all inserted correctly.
     private void assertObjectsWereInserted(
-        Map<UUID, Map<String, Object>> mapObjectIdToObjectFields) throws ApiException {
+            Map<UUID, Map<String, Object>> mapObjectIdToObjectFields) throws ApiException {
 
         // get all properties (props == null)
         var objects = objectsClient.get(collectionName, objectIds, null).getResults();

@@ -1,6 +1,6 @@
 package common;
 
-import org.openapitools.client.ApiException;
+import com.piiano.vault.client.openapi.ApiException;
 
 @FunctionalInterface
 public interface ApiMethod {

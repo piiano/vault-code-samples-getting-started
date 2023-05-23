@@ -1,11 +1,14 @@
 package tokens;
 
-import org.openapitools.client.ApiClient;
-import org.openapitools.client.ApiException;
-import org.openapitools.client.api.TokensApi;
-import org.openapitools.client.model.*;
+import com.piiano.vault.client.openapi.ApiClient;
+import com.piiano.vault.client.openapi.ApiException;
+import com.piiano.vault.client.openapi.TokensApi;
+import com.piiano.vault.client.openapi.model.*;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static common.Client.*;
 import static java.util.Collections.emptyList;
@@ -20,8 +23,8 @@ public class TokensClient {
 
     public List<TokenValue> tokenize(String collectionName, List<TokenizeRequest> tokenizeRequest) throws ApiException {
         return collections.tokenize(collectionName, APP_FUNCTIONALITY_REASON,
-                                    tokenizeRequest, USE_DEFAULT_TTL, NO_TRANSACTION_ID,
-                                    NO_ADHOC_REASON, RELOAD_CACHE);
+                tokenizeRequest, USE_DEFAULT_TTL, NO_TRANSACTION_ID,
+                NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
     public List<DetokenizedToken> detokenize(String collectionName, TokenDefinition tokens, boolean includeMetadata, boolean archived) throws ApiException {

@@ -1,9 +1,10 @@
 package collections;
 
-import org.openapitools.client.ApiClient;
-import org.openapitools.client.ApiException;
-import org.openapitools.client.api.CollectionsApi;
-import org.openapitools.client.model.*;
+import com.piiano.vault.client.openapi.ApiClient;
+import com.piiano.vault.client.openapi.ApiException;
+import com.piiano.vault.client.openapi.CollectionsApi;
+import com.piiano.vault.client.openapi.model.Collection;
+import com.piiano.vault.client.openapi.model.Property;
 
 import static common.Client.JSON;
 import static common.Client.NO_OPTIONS;
@@ -14,14 +15,6 @@ public class CollectionsClient {
 
     public CollectionsClient(ApiClient client) {
         collections = new CollectionsApi(client);
-    }
-
-    public Collection add(Collection collection) throws ApiException {
-        return collections.addCollection(collection, JSON, NO_OPTIONS);
-    }
-
-    public void delete(String collectionName) throws ApiException {
-        collections.deleteCollection(collectionName);
     }
 
     public static Property createProp(
@@ -37,5 +30,13 @@ public class CollectionsClient {
         property.setIsEncrypted(isEncrypted);
         property.isIndex(isIndex);
         return property;
+    }
+
+    public Collection add(Collection collection) throws ApiException {
+        return collections.addCollection(collection, JSON, NO_OPTIONS);
+    }
+
+    public void delete(String collectionName) throws ApiException {
+        collections.deleteCollection(collectionName);
     }
 }
