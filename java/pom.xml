@@ -6,7 +6,7 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <guava.version>31.1-jre</guava.version>
+        <guava.version>32.0.0-jre</guava.version>
         <jackson-datatype-jsr310.version>2.15.0</jackson-datatype-jsr310.version>
         <spring-boot-maven-plugin.version>3.0.6</spring-boot-maven-plugin.version>
         <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
