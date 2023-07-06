@@ -135,7 +135,7 @@ public class PvaultGettingStarted {
                 "123-12-1234", "john@somemail.com",
                 "+1-121212123", "12345");
         UUID customer1ID = objectsApi.addObject(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, objectDetails,
-                NO_ADHOC_REASON, false, USE_DEFAULT_TTL).getId();
+                NO_ADHOC_REASON, false, USE_DEFAULT_TTL, false, null).getId();
         customerIds.add(customer1ID);
         print("customer1 ID: ", customer1ID.toString());
 
@@ -143,7 +143,7 @@ public class PvaultGettingStarted {
                 "123-12-1235", "mary@somemail.com",
                 "+1-121212124", "12345");
         UUID customer2ID = objectsApi.addObject(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, objectDetails,
-                NO_ADHOC_REASON, false, USE_DEFAULT_TTL).getId();
+                NO_ADHOC_REASON, false, USE_DEFAULT_TTL, false, null).getId();
         customerIds.add(customer2ID);
         print("customer2 ID: ", customer2ID.toString());
 
@@ -152,7 +152,7 @@ public class PvaultGettingStarted {
                 "+1-121212125", "12345");
 
         UUID customer3ID = objectsApi.addObject(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, objectDetails,
-                NO_ADHOC_REASON, false, USE_DEFAULT_TTL).getId();
+                NO_ADHOC_REASON, false, USE_DEFAULT_TTL, false, null).getId();
         customerIds.add(customer3ID);
         print("customer3 ID: ", customer3ID.toString());
 
@@ -188,7 +188,8 @@ public class PvaultGettingStarted {
 
         ObjectFieldsPage objectIdsPage =
                 objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, NO_ADHOC_REASON,
-                        false, 1, "", "", emptyList(), ImmutableSet.of(UNSAFE_OPTION), null);
+                        false, 1, "", false, "", emptyList(),
+                        ImmutableSet.of(UNSAFE_OPTION), null);
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
@@ -203,8 +204,8 @@ public class PvaultGettingStarted {
     private static void queryPropertiesOfObjectsById(ObjectsApi objectsApi, UUID id) throws ApiException {
 
         ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
-                NO_ADHOC_REASON, false, null, "", "", ImmutableList.of(id),
-                NO_OPTIONS, ImmutableList.of("ssn"));
+                NO_ADHOC_REASON, false, null, "",
+                false, "", ImmutableList.of(id), NO_OPTIONS, ImmutableList.of("ssn"));
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
@@ -217,8 +218,8 @@ public class PvaultGettingStarted {
     private static void getTransformedPropertiesOfObjects(ObjectsApi objectsApi, UUID id) throws ApiException {
 
         ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
-                NO_ADHOC_REASON, false, null, "", "", ImmutableList.of(id),
-                NO_OPTIONS, ImmutableList.of("ssn.mask", "email.mask", "phone_number.mask"));
+                NO_ADHOC_REASON, false, null, "", false, "",
+                ImmutableList.of(id), NO_OPTIONS, ImmutableList.of("ssn.mask", "email.mask", "phone_number.mask"));
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);

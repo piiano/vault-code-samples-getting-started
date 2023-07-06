@@ -6,7 +6,7 @@ python3 -m venv .venv --prompt vault_getting_started
 source .venv/bin/activate
 
 echo "Downloading openapi file"
-curl -o openapi.yaml https://piiano.com/docs/assets/openapi.yaml
+curl -o openapi.yaml https://docs.piiano.com/assets/openapi.yaml
 
 echo "Running openapi tools to create the SDK"
 docker run --rm -u $(id -u):$(id -g) -v "${PWD}:/local" openapitools/openapi-generator-cli:v6.1.0 generate \
