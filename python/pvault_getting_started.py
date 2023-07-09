@@ -4,7 +4,11 @@ from openapi_client.api import tokens_api as tokens_API
 from openapi_client import api_client
 from openapi_client import configuration
 from openapi_client import models
+from openapi_client.models import PropertyName
+from openapi_client.models import DataTypeName
+from openapi_client.models import Description
 import openapi_client
+
 
 COLLECTION_NAME = 'customers'
 APP_FUNCTIONALITY_REASON = "AppFunctionality"
@@ -30,10 +34,11 @@ def main():
 
     print('\n\n== Step 2: Create a collection ==\n\n')
 
-    ssn_property = models.ModelProperty(name="ssn", data_type_name="SSN", is_unique=True, description="Social security number")
-    email_property = models.ModelProperty(name="email", data_type_name="EMAIL")
-    phone_number_property = models.ModelProperty(name="phone_number", data_type_name="PHONE_NUMBER", is_nullable=True)
-    zip_code_property = models.ModelProperty(name="zip_code_us", data_type_name="ZIP_CODE_US", is_nullable=True)
+
+    ssn_property = models.ModelProperty(name=PropertyName(value="ssn"), data_type_name=DataTypeName(value="SSN"), description= Description(value="Social security number"), is_unique=True)
+    email_property = models.ModelProperty(name=PropertyName("email"), data_type_name=DataTypeName("EMAIL"))
+    phone_number_property = models.ModelProperty(name=PropertyName("phone_number"), data_type_name=DataTypeName("PHONE_NUMBER"), is_nullable=True)
+    zip_code_property = models.ModelProperty(name=PropertyName("zip_code_us"), data_type_name=DataTypeName("ZIP_CODE_US"), is_nullable=True)
 
     customers_collection = add_customers_collection(collections_api_client, [ssn_property, email_property, phone_number_property, zip_code_property])
 
@@ -100,7 +105,7 @@ def add_customers_collection(collections_api_client, props):
     #       Throughout this script we will use JSON exclusively
 
     customers_collection = models.Collection(
-        name=COLLECTION_NAME,
+        name=models.CollectionName(value=COLLECTION_NAME),
         type="PERSONS",
         properties=props
     )
@@ -108,7 +113,7 @@ def add_customers_collection(collections_api_client, props):
     customers_collection = collections_api_client.add_collection(customers_collection)
 
     # Check the collections has been added
-    collection = collections_api_client.get_collection(customers_collection.name)
+    collection = collections_api_client.get_collection(COLLECTION_NAME)
     assert collection is not None
     print(f"Collection details: \n{collection}\n")
 
@@ -119,13 +124,13 @@ def add_objects_to_collection(objects_api_client, customers_collection, customer
 
     print(f"Adding customers 1, 2, 3: \n{customers}\nto collection '{customers_collection.name}'\n")
 
-    customers_id = {objects_api_client.add_object(collection=customers_collection.name, reason=APP_FUNCTIONALITY_REASON, object_fields=customer)["id"]: customer
+    customers_id = {objects_api_client.add_object(collection=COLLECTION_NAME, reason=APP_FUNCTIONALITY_REASON, object_fields=customer)["id"]: customer
                     for customer in customers}
 
     print(f"This is a key: value dictionary of customer_id: customer => \n\n{customers_id}\n")
 
     response = objects_api_client.search_objects(
-        collection=customers_collection.name,
+        collection=COLLECTION_NAME,
         reason=APP_FUNCTIONALITY_REASON,
         query=models.Query(match=models.MatchMap(email="john@somemail.com")),
         props=["id"],
@@ -140,17 +145,17 @@ def add_objects_to_collection(objects_api_client, customers_collection, customer
 
 
 def tokenize_customer(tokens_api_client, customers_collection, customer, prop, token_request, search_token_request):
-    token = tokens_api_client.tokenize(customers_collection.name,
+    token = tokens_api_client.tokenize(COLLECTION_NAME,
                                        APP_FUNCTIONALITY_REASON,
                                        [token_request])[0]
     print(f"Tokenize customer1 email result: \n{token}\n")
 
-    token_ids = tokens_api_client.search_tokens(customers_collection.name, APP_FUNCTIONALITY_REASON, search_token_request)
+    token_ids = tokens_api_client.search_tokens(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, search_token_request)
 
     assert token_ids[0].token_id == token.token_id, f"{token_ids[0].token_id = } != {token['token_id'] = }"
 
     detokenized = tokens_api_client.detokenize(
-        customers_collection.name,
+        COLLECTION_NAME,
         reason=APP_FUNCTIONALITY_REASON, token_ids=[token.token_id])
 
     print(f"Detokenize customer1 token result: \n{detokenized}\n")
@@ -158,9 +163,9 @@ def tokenize_customer(tokens_api_client, customers_collection, customer, prop, t
     assert len(detokenized) == 1
     detokenized = detokenized[0]
 
+
     assert detokenized.token_id == token.token_id, f"{detokenized.token_id = } != {token.token_id = }"
-    assert detokenized.fields[
-               prop.name] == customer.email, f"{detokenized.fields[prop.name]} != {customer.email}"
+    assert detokenized.fields[prop.name.to_str()] == customer.email, f"{detokenized.fields[prop.name.to_str()]} != {customer.email}"
 
     return token
 
@@ -179,18 +184,18 @@ def tokenize_object_fields(tokens_api_client, customers_collection):
     ]
 
     # Tokenizing by this 3 requests. Expecting to get 3 token ids, one for each request
-    tokenize_result = tokens_api_client.tokenize(collection=customers_collection.name,
+    tokenize_result = tokens_api_client.tokenize(collection=COLLECTION_NAME,
                                                  reason=APP_FUNCTIONALITY_REASON,
                                                  tokenize_request=tokenize_requests_list)
 
     # Taking tokenize results and extract the token ids into a list
     token_ids = [token["token_id"] for token in tokenize_result]
-    detokenize_result = tokens_api_client.detokenize(collection=customers_collection.name,
+    detokenize_result = tokens_api_client.detokenize(collection=COLLECTION_NAME,
                                                      reason=APP_FUNCTIONALITY_REASON,
                                                      token_ids=token_ids)
 
 def query_customers(objects_api_client, customers_collection, customer1, customer1_id, prop):
-    all_customers = objects_api_client.list_objects(customers_collection.name, APP_FUNCTIONALITY_REASON, page_size=1,
+    all_customers = objects_api_client.list_objects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, page_size=1,
                                                     options=['unsafe'])
     print(f"Paging result of listing customers collection with page size = 1: \n{all_customers.paging}\n")
 
@@ -202,11 +207,10 @@ def query_customers(objects_api_client, customers_collection, customer1, custome
     assert customer.email == orig_customer.email
 
     # Now getting only the SSN
-
     customer1_ssn_from_get = objects_api_client.list_objects(
-        customers_collection.name,
+        COLLECTION_NAME,
         APP_FUNCTIONALITY_REASON,
-        props=[prop],
+        props=[prop.to_str()],
         ids=[customer1_id])
 
     assert len(customer1_ssn_from_get.results) > 0
@@ -218,7 +222,7 @@ def query_customers(objects_api_client, customers_collection, customer1, custome
     # Getting all the details of customer1
 
     customer1_from_get = objects_api_client.list_objects(
-        customers_collection.name,
+        COLLECTION_NAME,
         APP_FUNCTIONALITY_REASON,
         options=[UNSAFE_OPTION],
         ids=[customer1_id])
@@ -230,7 +234,7 @@ def query_customers(objects_api_client, customers_collection, customer1, custome
     # Getting Customer1's data with masks
 
     customer1_masked = objects_api_client.list_objects(
-        customers_collection.name,
+        COLLECTION_NAME,
         APP_FUNCTIONALITY_REASON,
         props=['ssn.mask', 'email.mask', 'phone_number.mask'],
         ids=[customer1_id])
@@ -242,21 +246,21 @@ def query_customers(objects_api_client, customers_collection, customer1, custome
 
 def delete_customers(tokens_api_client, objects_api_client, customers_collection, token_id, customer1_id, search_token_request):
     tokens_api_client.delete_tokens(
-        collection=customers_collection.name,
+        collection=COLLECTION_NAME,
         reason=APP_FUNCTIONALITY_REASON,
         token_ids=[token_id.token_id])
 
-    token_ids = tokens_api_client.search_tokens(customers_collection.name, APP_FUNCTIONALITY_REASON, search_token_request)
+    token_ids = tokens_api_client.search_tokens(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, search_token_request)
     assert len(token_ids) == 0
 
     # Deleting the customer
 
     objects_api_client.delete_object_by_id(
-        customers_collection.name, id=customer1_id, reason=APP_FUNCTIONALITY_REASON)
+        COLLECTION_NAME, id=customer1_id, reason=APP_FUNCTIONALITY_REASON)
 
     try:
         customer1_from_get = objects_api_client.list_objects(
-            customers_collection.name,
+            COLLECTION_NAME,
             APP_FUNCTIONALITY_REASON,
             options=[UNSAFE_OPTION],
             ids=[customer1_id])
