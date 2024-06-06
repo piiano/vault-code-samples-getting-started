@@ -22,9 +22,8 @@ public class TokensClient {
     }
 
     public List<TokenValue> tokenize(String collectionName, List<TokenizeRequest> tokenizeRequest) throws ApiException {
-        return collections.tokenize(collectionName, APP_FUNCTIONALITY_REASON,
-                tokenizeRequest, USE_DEFAULT_TTL, NO_TRANSACTION_ID,
-                NO_ADHOC_REASON, RELOAD_CACHE);
+        return collections.tokenize(collectionName, APP_FUNCTIONALITY_REASON, tokenizeRequest,
+                USE_DEFAULT_TTL, emptyList(), NO_TRANSACTION_ID, NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
     public List<DetokenizedToken> detokenize(String collectionName, TokenDefinition tokens, boolean includeMetadata, boolean archived) throws ApiException {
@@ -36,26 +35,26 @@ public class TokensClient {
             options.add("archived");
         }
         return collections.detokenize(collectionName, APP_FUNCTIONALITY_REASON, tokens.objectIds(),
-                tokens.tags(), tokens.tokenIds(), emptyList(), options, NO_ADHOC_REASON, RELOAD_CACHE);
+                tokens.tags(), tokens.tokenIds(), emptyList(), options, emptyList(), NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
     public void archiveTokens(String collectionName, TokenDefinition tokens) throws ApiException {
         collections.updateTokens(collectionName, APP_FUNCTIONALITY_REASON, new UpdateTokenRequest(), "0",
-                tokens.objectIds(), tokens.tags(), tokens.tokenIds(), NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
+                tokens.objectIds(), tokens.tags(), tokens.tokenIds(), NO_OPTIONS, emptyList(), NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
     public List<TokenMetadata> searchTokens(String collectionName, QueryToken queryToken) throws ApiException {
         return collections.searchTokens(collectionName, APP_FUNCTIONALITY_REASON, queryToken,
-                NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
+                NO_OPTIONS, emptyList(), NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
     public void updateTokens(String collectionName, TokenDefinition tokens, UpdateTokenRequest updateTokenRequest) throws ApiException {
         collections.updateTokens(collectionName, APP_FUNCTIONALITY_REASON, updateTokenRequest, USE_DEFAULT_TTL,
-                tokens.objectIds(), tokens.tags(), tokens.tokenIds(), NO_OPTIONS, NO_ADHOC_REASON, RELOAD_CACHE);
+                tokens.objectIds(), tokens.tags(), tokens.tokenIds(), NO_OPTIONS, emptyList(), NO_ADHOC_REASON, RELOAD_CACHE);
     }
 
     public Map<String, String> rotateTokens(String collectionName, List<String> tokenIds) throws ApiException {
         return collections.rotateTokens(tokenIds, collectionName, APP_FUNCTIONALITY_REASON,
-                NO_ADHOC_REASON, RELOAD_CACHE);
+                emptyList(), NO_ADHOC_REASON, RELOAD_CACHE);
     }
 }

@@ -134,7 +134,7 @@ public class PvaultGettingStarted {
                 "123-12-1234", "john@somemail.com",
                 "+1-121212123", "12345");
         UUID customer1ID = objectsApi.addObject(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, objectDetails,
-                NO_ADHOC_REASON, false, USE_DEFAULT_TTL, false, null).getId();
+                NO_ADHOC_REASON, false, emptyList(), USE_DEFAULT_TTL, false, null).getId();
         customerIds.add(customer1ID);
         print("customer1 ID: ", customer1ID.toString());
 
@@ -142,7 +142,7 @@ public class PvaultGettingStarted {
                 "123-12-1235", "mary@somemail.com",
                 "+1-121212124", "12345");
         UUID customer2ID = objectsApi.addObject(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, objectDetails,
-                NO_ADHOC_REASON, false, USE_DEFAULT_TTL, false, null).getId();
+                NO_ADHOC_REASON, false, emptyList(), USE_DEFAULT_TTL, false, null).getId();
         customerIds.add(customer2ID);
         print("customer2 ID: ", customer2ID.toString());
 
@@ -151,7 +151,7 @@ public class PvaultGettingStarted {
                 "+1-121212125", "12345");
 
         UUID customer3ID = objectsApi.addObject(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, objectDetails,
-                NO_ADHOC_REASON, false, USE_DEFAULT_TTL, false, null).getId();
+                NO_ADHOC_REASON, false, emptyList(), USE_DEFAULT_TTL, false, null).getId();
         customerIds.add(customer3ID);
         print("customer3 ID: ", customer3ID.toString());
 
@@ -170,7 +170,7 @@ public class PvaultGettingStarted {
         tokenizeRequest.setTags(ImmutableList.of("token_tag"));
 
         String token = tokensApi.tokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, List.of(tokenizeRequest),
-                USE_DEFAULT_TTL, NO_TRANSACTION_ID, NO_ADHOC_REASON, false).get(0).getTokenId();
+                USE_DEFAULT_TTL, emptyList(), NO_TRANSACTION_ID, NO_ADHOC_REASON, false).get(0).getTokenId();
         print("Token: ", token);
         return token;
     }
@@ -178,7 +178,7 @@ public class PvaultGettingStarted {
     private static void detokenizeToken(TokensApi tokensApi, String token) throws ApiException {
 
         String returnedEmail = tokensApi.detokenize(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, emptyList(),
-                        emptyList(), ImmutableList.of(token), emptyList(), NO_OPTIONS, NO_ADHOC_REASON, false)
+                        emptyList(), ImmutableList.of(token), emptyList(), NO_OPTIONS, emptyList(), NO_ADHOC_REASON, false)
                 .get(0).getFields().get("email").toString();
         assert "john@somemail.com".equals(returnedEmail);
     }
@@ -188,7 +188,7 @@ public class PvaultGettingStarted {
         ObjectFieldsPage objectIdsPage =
                 objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, NO_ADHOC_REASON,
                         false, 1, "", false, "",
-                        emptyList(), ImmutableSet.of(UNSAFE_OPTION), null);
+                        emptyList(), emptyList(), ImmutableSet.of(UNSAFE_OPTION), null);
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
@@ -204,7 +204,7 @@ public class PvaultGettingStarted {
 
         ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
                 NO_ADHOC_REASON, false, null, "", false, "",
-                ImmutableList.of(id), NO_OPTIONS, ImmutableList.of("ssn"));
+                emptyList(), ImmutableList.of(id), NO_OPTIONS, ImmutableList.of("ssn"));
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
@@ -218,7 +218,7 @@ public class PvaultGettingStarted {
 
         ObjectFieldsPage objectIdsPage = objectsApi.listObjects(COLLECTION_NAME, APP_FUNCTIONALITY_REASON,
                 NO_ADHOC_REASON, false, null, "", false, "",
-                ImmutableList.of(id), NO_OPTIONS, ImmutableList.of("ssn.mask", "email.mask", "phone_number.mask"));
+                emptyList(), ImmutableList.of(id), NO_OPTIONS, ImmutableList.of("ssn.mask", "email.mask", "phone_number.mask"));
 
         assert objectIdsPage.getResults().size() == 1;
         Map<String, Object> searchResult = objectIdsPage.getResults().get(0);
@@ -232,13 +232,13 @@ public class PvaultGettingStarted {
     private static void deleteToken(TokensApi tokensApi, String token) throws ApiException {
 
         tokensApi.deleteTokens(COLLECTION_NAME, APP_FUNCTIONALITY_REASON, emptyList(), emptyList(),
-                ImmutableList.of(token), null, NO_OPTIONS, NO_ADHOC_REASON, false);
+                ImmutableList.of(token), null, NO_OPTIONS, emptyList(), NO_ADHOC_REASON, false);
     }
 
     private static void deleteObject(ObjectsApi objectsApi, UUID id) throws ApiException {
 
         objectsApi.deleteObjectById(COLLECTION_NAME, id, APP_FUNCTIONALITY_REASON,
-                NO_OPTIONS, NO_ADHOC_REASON, false);
+                NO_OPTIONS, NO_ADHOC_REASON, false, emptyList());
     }
 
     private static ApiClient getApiClient() {
