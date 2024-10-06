@@ -10,15 +10,17 @@ import java.util.HashMap;
 public class ApiError {
     public Response.Status status;
     public String error_code;
+    public String error_url;
     public String message;
     public HashMap<String, String> context;
 
     public ApiError() {
     }
 
-    private ApiError(Response.Status status, String error_code, String message, HashMap<String, String> context) {
+    private ApiError(Response.Status status, String error_code, String error_url, String message, HashMap<String, String> context) {
         this.status = status;
         this.error_code = error_code;
+        this.error_url = error_url;
         this.message = message;
         this.context = context;
     }
@@ -31,10 +33,10 @@ public class ApiError {
     }
 
     public static ApiError fromStatus(Response.Status status) {
-        return new ApiError(status, null, null, null);
+        return new ApiError(status, null, null, null, null);
     }
 
-    public static ApiError fromStatusCodeAndMessage(Response.Status status, String error_code, String message) {
-        return new ApiError(status, error_code, message, null);
+    public static ApiError fromStatusCodeAndMessage(Response.Status status, String error_code, String error_url, String message) {
+        return new ApiError(status, error_code, error_url, message, null);
     }
 }
